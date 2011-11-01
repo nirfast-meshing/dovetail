@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Image2Mesh</class>
+ <widget class="QWidget" name="Image2Mesh">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>784</width>
+    <height>564</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Image2Mesh</string>
+  </property>
+  <widget class="QGroupBox" name="groupBox_Input">
+   <property name="geometry">
+    <rect>
+     <x>5</x>
+     <y>0</y>
+     <width>303</width>
+     <height>135</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Input Info</string>
+   </property>
+   <widget class="QLineEdit" name="lineEdit_infilename">
+    <property name="geometry">
+     <rect>
+      <x>12</x>
+      <y>48</y>
+      <width>144</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_BrowseImage">
+    <property name="geometry">
+     <rect>
+      <x>188</x>
+      <y>43</y>
+      <width>87</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Browse</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="infnLabel">
+    <property name="geometry">
+     <rect>
+      <x>13</x>
+      <y>25</y>
+      <width>251</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Image/Segmentation file name:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_SDfilename">
+    <property name="geometry">
+     <rect>
+      <x>13</x>
+      <y>78</y>
+      <width>144</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_BrowseSD">
+    <property name="geometry">
+     <rect>
+      <x>189</x>
+      <y>74</y>
+      <width>87</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Browse</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_ImageInfo">
+   <property name="geometry">
+    <rect>
+     <x>316</x>
+     <y>0</y>
+     <width>364</width>
+     <height>135</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Image Info</string>
+   </property>
+   <widget class="QLineEdit" name="lineEdit_X">
+    <property name="geometry">
+     <rect>
+      <x>144</x>
+      <y>29</y>
+      <width>42</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Y">
+    <property name="geometry">
+     <rect>
+      <x>221</x>
+      <y>29</y>
+      <width>42</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Z">
+    <property name="geometry">
+     <rect>
+      <x>303</x>
+      <y>30</y>
+      <width>42</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_X">
+    <property name="geometry">
+     <rect>
+      <x>131</x>
+      <y>31</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>X</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Y">
+    <property name="geometry">
+     <rect>
+      <x>205</x>
+      <y>30</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Y</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Z">
+    <property name="geometry">
+     <rect>
+      <x>286</x>
+      <y>31</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Z</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Slices">
+    <property name="geometry">
+     <rect>
+      <x>305</x>
+      <y>66</y>
+      <width>42</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Rows">
+    <property name="geometry">
+     <rect>
+      <x>109</x>
+      <y>67</y>
+      <width>36</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Rows</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Cols">
+    <property name="geometry">
+     <rect>
+      <x>191</x>
+      <y>66</y>
+      <width>31</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Cols</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Slices">
+    <property name="geometry">
+     <rect>
+      <x>267</x>
+      <y>67</y>
+      <width>37</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Slices</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Rows">
+    <property name="geometry">
+     <rect>
+      <x>146</x>
+      <y>65</y>
+      <width>42</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Cols">
+    <property name="geometry">
+     <rect>
+      <x>222</x>
+      <y>65</y>
+      <width>42</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_PixelSize">
+    <property name="geometry">
+     <rect>
+      <x>13</x>
+      <y>32</y>
+      <width>109</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Pixel Size (in mm):</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_VoxelDims">
+    <property name="geometry">
+     <rect>
+      <x>16</x>
+      <y>68</y>
+      <width>84</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Voxel Dims:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_VoxelDims_2">
+    <property name="geometry">
+     <rect>
+      <x>15</x>
+      <y>105</y>
+      <width>84</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Origin Offset:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_OffsetZ">
+    <property name="geometry">
+     <rect>
+      <x>307</x>
+      <y>102</y>
+      <width>42</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_X_2">
+    <property name="geometry">
+     <rect>
+      <x>135</x>
+      <y>103</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>X</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Y_2">
+    <property name="geometry">
+     <rect>
+      <x>209</x>
+      <y>102</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Y</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Z_2">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>103</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string>Z</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_OffsetX">
+    <property name="geometry">
+     <rect>
+      <x>148</x>
+      <y>101</y>
+      <width>42</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_OffsetY">
+    <property name="geometry">
+     <rect>
+      <x>225</x>
+      <y>101</y>
+      <width>42</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
