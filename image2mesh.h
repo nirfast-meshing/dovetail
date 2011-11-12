@@ -2,6 +2,10 @@
 #define IMAGE2MESH_H
 
 #include <QWidget>
+#include <QFileInfo>
+#include <QDir>
+#include <QString>
+#include "metaimageio.h"
 
 namespace Ui {
     class Image2Mesh;
@@ -19,11 +23,14 @@ private slots:
     void on_pushButton_BrowseImage_clicked();
 
 signals:
-    void UpdateImageProperties(const QString &);
+
 
 private:
     Ui::Image2Mesh *ui;
+    MetaImageIO mi;
     QString lastImageFile;
+
+    void UpdateImageProperties();
 };
 
 #endif // IMAGE2MESH_H

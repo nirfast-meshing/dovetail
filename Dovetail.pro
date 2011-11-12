@@ -9,10 +9,16 @@ QT       += core gui
 TARGET = Dovetail
 TEMPLATE = app
 
+INCLUDEPATH += ../../../../../Desktop/Incoming/codes/MyMetaImageIO/MyMetaImageIO
 
 SOURCES += main.cpp\
-        image2mesh.cpp
+        image2mesh.cpp \
+    ../../../../../Desktop/Incoming/codes/MyMetaImageIO/MyMetaImageIO/metaimageio.cpp
 
-HEADERS  += image2mesh.h
+HEADERS  += image2mesh.h \
+    ../../../../../Desktop/Incoming/codes/MyMetaImageIO/MyMetaImageIO/MyMetaImageIO_global.h \
+    ../../../../../Desktop/Incoming/codes/MyMetaImageIO/MyMetaImageIO/metaimageio.h
 
 FORMS    += image2mesh.ui
+
+

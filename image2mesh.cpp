@@ -1,5 +1,6 @@
 #include "image2mesh.h"
 #include "ui_image2mesh.h"
+
 #include <QtGui>
 
 Image2Mesh::Image2Mesh(QWidget *parent) :
@@ -7,7 +8,7 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     ui(new Ui::Image2Mesh)
 {
     ui->setupUi(this);
-    connect(this, SIGNAL(UpdateImageProperties(QString)), ui->lineEdit_SDfilename, SLOT(setText(QString)));
+//    connect(this, SIGNAL(UpdateImageProperties(QString)), ui->lineEdit_SDfilename, SLOT(setText(QString)));
 }
 
 Image2Mesh::~Image2Mesh()
@@ -17,14 +18,57 @@ Image2Mesh::~Image2Mesh()
 
 void Image2Mesh::on_pushButton_BrowseImage_clicked()
 {
-    QString imageFile = QFileDialog::getOpenFileName(this, tr("Select Image file(s)"),
+    const QString imageFile = QFileDialog::getOpenFileName(this, tr("Select Image file(s)"),
                                                      "",tr("Images (*.bmp *.tiff *.png *.mha)"),
                                                      NULL, QFileDialog::ReadOnly);
     if (! imageFile.isEmpty() ) {
-        ui->lineEdit_infilename->setText(imageFile);
-        emit UpdateImageProperties(imageFile);
+        if (QFileInfo(imageFile).suffix() == "mha")
+        {
+            ui->lineEdit_infilename->setText(imageFile);
+            mi._filename = imageFile.toStdString();
+            if (mi.ReadHeader() == 1)
+            {
+                std::cerr << " Could not read " << imageFile.toStdString() << std::endl;
+                ui->lineEdit_infilename->setText(QString("Could not read file!"));
+            }
+            UpdateImageProperties();
+        }
+
+//        emit
         this->lastImageFile = imageFile;
     }
     else
         ui->lineEdit_infilename->clear();
 }
+
+void Image2Mesh::UpdateImageProperties()
+{
+    char s[512];
+    sprintf(s,"%d",mi.myheader.dimsize[0]);
+    ui->lineEdit_Rows->setText(QString(s));
+
+    sprintf(s,"%d",mi.myheader.dimsize[1]);
+    ui->lineEdit_Cols->setText(QString(s));
+
+    sprintf(s,"%d",mi.myheader.dimsize[2]);
+    ui->lineEdit_Slices->setText(QString(s));
+
+    sprintf(s,"%.3f",mi.myheader.elementsize[0]);
+    ui->lineEdit_X->setText(s);
+
+    sprintf(s,"%.3f",mi.myheader.elementsize[1]);
+    ui->lineEdit_Y->setText(s);
+
+    sprintf(s,"%.3f",mi.myheader.elementsize[2]);
+    ui->lineEdit_Z->setText(s);
+
+    sprintf(s,"%.2f",mi.myheader.offset[0]);
+    ui->lineEdit_OffsetX->setText(s);
+
+    sprintf(s,"%.2f",mi.myheader.offset[1]);
+    ui->lineEdit_OffsetY->setText(s);
+
+    sprintf(s,"%.2f",mi.myheader.offset[2]);
+    ui->lineEdit_OffsetZ->setText(s);
+}
+
