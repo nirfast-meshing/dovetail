@@ -10,15 +10,33 @@ TARGET = Dovetail
 TEMPLATE = app
 
 INCLUDEPATH += ../../../../../Desktop/Incoming/codes/MyMetaImageIO/MyMetaImageIO
+INCLUDEPATH += ../../../../../local/CGAL/3.9/include
 
 SOURCES += main.cpp\
         image2mesh.cpp \
-    ../../../../../Desktop/Incoming/codes/MyMetaImageIO/MyMetaImageIO/metaimageio.cpp
+    ../../../../../Desktop/Incoming/codes/MyMetaImageIO/MyMetaImageIO/metaimageio.cpp \
+    cgalmeshgenerator.cpp
 
 HEADERS  += image2mesh.h \
     ../../../../../Desktop/Incoming/codes/MyMetaImageIO/MyMetaImageIO/MyMetaImageIO_global.h \
-    ../../../../../Desktop/Incoming/codes/MyMetaImageIO/MyMetaImageIO/metaimageio.h
+    ../../../../../Desktop/Incoming/codes/MyMetaImageIO/MyMetaImageIO/metaimageio.h \
+    cgalmeshgenerator.h \
+    cgal_header.h
+
+LIBS += /usr/local/lib/libgmp.a /usr/local/lib/libmpfr.a \
+    /usr/local/lib/libboost_thread-mt.a \
+    ../../../../../local/CGAL/3.9/lib/libCGAL.a
+
+QMAKE_CXXFLAGS += -Wall -fno-common \
+        -frounding-math -fno-strict-aliasing
 
 FORMS    += image2mesh.ui
+
+
+
+
+
+
+
 
 

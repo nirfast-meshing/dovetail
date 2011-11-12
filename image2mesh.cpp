@@ -3,6 +3,8 @@
 
 #include <QtGui>
 
+int Run_CGALMeshGenerator(MetaImageIO& _mi);
+
 Image2Mesh::Image2Mesh(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Image2Mesh)
@@ -72,3 +74,28 @@ void Image2Mesh::UpdateImageProperties()
     ui->lineEdit_OffsetZ->setText(s);
 }
 
+
+void Image2Mesh::on_pushButton_GenerateMesh_clicked()
+{
+    // TODO
+    // Get the output file name and construct corresponding
+    // inr filename and set inrFilename before calling
+    // CGALMeshGenerator
+    if (Run_CGALMeshGenerator(mi) != 0)
+        // TODO
+        // Print error
+        ;
+}
+
+int Run_CGALMeshGenerator(MetaImageIO& _mi)
+{
+    CGALMeshGenerator generator(_mi);
+    if (generator.metaimage_error)
+        return 1;
+    else
+    {
+        generator.Execute();
+        return 0;
+    }
+
+}
