@@ -10,6 +10,7 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     ui(new Ui::Image2Mesh)
 {
     ui->setupUi(this);
+    ui->pushButton_GenerateMesh->setEnabled(false);
 //    connect(this, SIGNAL(UpdateImageProperties(QString)), ui->lineEdit_SDfilename, SLOT(setText(QString)));
 }
 
@@ -33,6 +34,7 @@ void Image2Mesh::on_pushButton_BrowseImage_clicked()
                 std::cerr << " Could not read " << imageFile.toStdString() << std::endl;
                 ui->lineEdit_infilename->setText(QString("Could not read file!"));
             }
+            ui->pushButton_GenerateMesh->setEnabled(true);
             UpdateImageProperties();
         }
 
@@ -82,9 +84,7 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
     // inr filename and set inrFilename before calling
     // CGALMeshGenerator
     if (Run_CGALMeshGenerator(mi) != 0)
-        // TODO
-        // Print error
-        ;
+        ui->lineEdit_infilename->setText("Error in Mesh Generator");
 }
 
 int Run_CGALMeshGenerator(MetaImageIO& _mi)
@@ -94,8 +94,10 @@ int Run_CGALMeshGenerator(MetaImageIO& _mi)
         return 1;
     else
     {
-        generator.Execute();
-        return 0;
+        if (generator.Execute() != 0)
+            return 1; // Unsuccessful
+        else
+            return 0;
     }
 
 }

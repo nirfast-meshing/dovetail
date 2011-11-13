@@ -23,9 +23,12 @@ HEADERS  += image2mesh.h \
     cgalmeshgenerator.h \
     cgal_header.h
 
-LIBS += /usr/local/lib/libgmp.a /usr/local/lib/libmpfr.a \
+LIBS += /usr/local/lib/libmpfr.a /usr/local/lib/libgmp.a \
     /usr/local/lib/libboost_thread-mt.a \
-    ../../../../../local/CGAL/3.9/lib/libCGAL.a
+    ../../../../../local/CGAL/3.9/lib/libCGAL.a \
+    ../../../../../local/CGAL/3.9/lib/libCGAL_ImageIO.a \
+    -framework OpenGL -lz
+
 
 QMAKE_CXXFLAGS += -Wall -fno-common \
         -frounding-math -fno-strict-aliasing

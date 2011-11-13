@@ -14,8 +14,8 @@ public:
     int Execute();
 
     double facet_angle, facet_size, facet_distance,
-               cell_radius_edge;
-    double  general_cell_size;
+           cell_radius_edge;
+    double general_cell_size;
     double special_size;         // Cell size to be used in subdomains of image with 'special_subdomain_label'
     int special_subdomain_label; // If this is set to zero, no subdomain resizing will be performed
 

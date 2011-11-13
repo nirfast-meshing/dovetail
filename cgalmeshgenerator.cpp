@@ -34,8 +34,12 @@ int CGALMeshGenerator::Execute()
         return 1;
     // Domain
     CGAL::Image_3 image;
+    if (image.read(_inrFilename.c_str()) != true)
+        return 1;
+
     Mesh_domain domain(image);
-    image.read(_inrFilename.c_str());
+
+
 
     // Sizing field: set global size to general_cell_size
     // and special size (label special_subdomain_label) to special_size
