@@ -1,0 +1,7 @@
+*.o
+ui_image2mesh.h
+.DS_Store
+moc_*
+*.app
+*.user
+Makefile
