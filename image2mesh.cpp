@@ -29,7 +29,7 @@ void Image2Mesh::on_pushButton_BrowseImage_clicked()
         {
             ui->lineEdit_infilename->setText(imageFile);
             mi._filename = imageFile.toStdString();
-            if (mi.ReadHeader() == 1)
+            if (mi.ReadHeader() != 0)
             {
                 std::cerr << " Could not read " << imageFile.toStdString() << std::endl;
                 ui->lineEdit_infilename->setText(QString("Could not read file!"));
@@ -37,8 +37,6 @@ void Image2Mesh::on_pushButton_BrowseImage_clicked()
             ui->pushButton_GenerateMesh->setEnabled(true);
             UpdateImageProperties();
         }
-
-//        emit
         this->lastImageFile = imageFile;
     }
     else
