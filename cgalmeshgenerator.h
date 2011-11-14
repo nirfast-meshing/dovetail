@@ -28,20 +28,20 @@ private:
 };
 
 
-// Vector_3<Kernel> v ( double x, double y, double z);
-// Aff_transformation_3<Kernel> t ( const Translation, Vector_3<Kernel> v);
-// Point_3<Kernel> t.operator() ( Point_3<Kernel> p) const
-class addoffset : public std::unary_function<Finte_vertices_iterator,Finte_vertices_iterator>
-{
-    Tr::Point offset;
+//// Vector_3<Kernel> v ( double x, double y, double z);
+//// Aff_transformation_3<Kernel> t ( const Translation, Vector_3<Kernel> v);
+//// Point_3<Kernel> t.operator() ( Point_3<Kernel> p) const
+//class addoffset : public std::unary_function<Finte_vertices_iterator,Finte_vertices_iterator>
+//{
+//    Tr::Point offset;
 
-public:
-    explicit addoffset(Finite_vertices_iterator& _other) : offset(_other) {}
-    Finte_vertices_iterator operator()(Finte_vertices_iterator& inp) const
-    {
-        inp->point()->x() += offset.point().x();
-        return inp;
-    }
-}
+//public:
+//    explicit addoffset(Finite_vertices_iterator& _other) : offset(_other) {}
+//    Finte_vertices_iterator operator()(Finte_vertices_iterator& inp) const
+//    {
+//        inp->point()->x() += offset.point().x();
+//        return inp;
+//    }
+//}
 
 #endif // CGALMESHGENERATOR_H

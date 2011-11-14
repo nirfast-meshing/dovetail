@@ -63,7 +63,7 @@ int CGALMeshGenerator::Execute()
 
     Tr tr = c3t3.triangulation();
 
-    std::transform(tr.finite_vertices_begin(), tr.finite_vertices_end(), tr.finite_vertices_begin(),B);
+//    std::transform(tr.finite_vertices_begin(), tr.finite_vertices_end(), tr.finite_vertices_begin(),B);
 
     // Output
     std::ofstream medit_file(outFilename.c_str());
