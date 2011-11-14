@@ -9,7 +9,7 @@ QT       += core gui
 TARGET = Dovetail
 TEMPLATE = app
 
-INCLUDEPATH += /Users/hamid_r_ghadyani/local/CGAL/3.8/include
+#INCLUDEPATH += /Users/hamid_r_ghadyani/local/CGAL/3.8/include
 INCLUDEPATH += ../MyMetaImageIO/MyMetaImageIO
 
 SOURCES += main.cpp\
@@ -26,8 +26,8 @@ HEADERS  += image2mesh.h \
 
 LIBS += /usr/local/lib/libmpfr.a /usr/local/lib/libgmp.a \
     	/usr/local/lib/libboost_thread-mt.a \
-        /Users/hamid_r_ghadyani/local/CGAL/3.8/lib/libCGAL.a \
-        /Users/hamid_r_ghadyani/local/CGAL/3.8/lib/libCGAL_ImageIO.a \
+        /usr/local/lib/libCGAL.a \
+        /usr/local/lib/libCGAL_ImageIO.a \
     	-framework OpenGL -lz
 
 
