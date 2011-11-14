@@ -57,9 +57,18 @@ int CGALMeshGenerator::Execute()
     // Meshing
     C3t3 c3t3 = CGAL::make_mesh_3<C3t3>(domain, criteria);
 
+    typedef Tr::Finite_vertices_iterator Finite_vertices_iterator;
+    typedef Tr::Point Point_3;
+    typedef Tr::Vertex_handle Vertex_handle;
+
+    Tr tr = c3t3.triangulation();
+
+    std::transform(tr.finite_vertices_begin(), tr.finite_vertices_end(), tr.finite_vertices_begin(),B);
+
     // Output
     std::ofstream medit_file(outFilename.c_str());
     c3t3.output_to_medit(medit_file);
+
     return 0;
 }
 
