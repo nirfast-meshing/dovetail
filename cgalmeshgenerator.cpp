@@ -16,6 +16,8 @@ CGALMeshGenerator::CGALMeshGenerator(MetaImageIO &metaimage) : metaimage_error(f
     _inrFilename = metaimage.inrFilename;
     _inrWritten = true;
 
+    metaimage_header = metaimage.myheader;
+
     // Setup the outFilename
     QFileInfo fi1(_inrFilename.c_str());
     QFileInfo fi2;
@@ -57,13 +59,19 @@ int CGALMeshGenerator::Execute()
     // Meshing
     C3t3 c3t3 = CGAL::make_mesh_3<C3t3>(domain, criteria);
 
-    typedef Tr::Finite_vertices_iterator Finite_vertices_iterator;
-    typedef Tr::Point Point_3;
-    typedef Tr::Vertex_handle Vertex_handle;
 
-    Tr tr = c3t3.triangulation();
+//    Tr tr = c3t3.triangulation();
+    K::Vector_3 _offset(metaimage_header.offset[0], metaimage_header.offset[1], metaimage_header.offset[2]);
+    for (Vertices_iterator itv=c3t3.triangulation().finite_vertices_begin(),
+         itv_end=c3t3.triangulation().finite_vertices_end();
+         itv!=itv_end;++itv)
+    {
+        itv->point()=
+                Weighted_point(itv->point().point()+_offset, itv->point().weight());
+    }
 
-//    std::transform(tr.finite_vertices_begin(), tr.finite_vertices_end(), tr.finite_vertices_begin(),B);
+//    addoffset Offset(metaimage_header.offset[0], metaimage_header.offset[1], metaimage_header.offset[2]);
+//    std::transform(tr.finite_vertices_begin(), tr.finite_vertices_end(), tr.finite_vertices_begin(),Offset);
 
     // Output
     std::ofstream medit_file(outFilename.c_str());

@@ -5,6 +5,31 @@
 
 #include "cgal_header.h"
 
+// Vector_3<Kernel> v ( double x, double y, double z);
+// Aff_transformation_3<Kernel> t ( const Translation, Vector_3<Kernel> v);
+// Point_3<Kernel> t.operator() ( Point_3<Kernel> p) const
+//class addoffset : public std::unary_function<Tr::Vertex,void>
+//{
+//    K::Vector_3 offset;
+//public:
+//    explicit addoffset(double x, double y, double z) : offset(K::Vector_3(x,y,z)) {}
+
+//    void operator()(Tr::Vertex& v)
+//    {
+//        v.point()=Weighted_point(v.point().point()+offset, v.point().weight());
+//    }
+//};
+
+//        for (Vertices_iterator itv=c3t3.triangulation().finite_vertices_begin(),
+//             itv_end=c3t3.triangulation().finite_vertices_end();
+//             itv!=itv_end;++itv)
+//        {
+//            itv->point()=
+//                    Weighted_point(itv->point().point()+offset, itv->point().weight());
+//        }
+//    }
+
+
 class CGALMeshGenerator
 {
 public:
@@ -22,26 +47,9 @@ public:
     bool metaimage_error;
     std::string outFilename;
 private:
+    MetaHeader metaimage_header;
     void initialize();
     bool _inrWritten;
     std::string _inrFilename;
 };
-
-
-//// Vector_3<Kernel> v ( double x, double y, double z);
-//// Aff_transformation_3<Kernel> t ( const Translation, Vector_3<Kernel> v);
-//// Point_3<Kernel> t.operator() ( Point_3<Kernel> p) const
-//class addoffset : public std::unary_function<Finte_vertices_iterator,Finte_vertices_iterator>
-//{
-//    Tr::Point offset;
-
-//public:
-//    explicit addoffset(Finite_vertices_iterator& _other) : offset(_other) {}
-//    Finte_vertices_iterator operator()(Finte_vertices_iterator& inp) const
-//    {
-//        inp->point()->x() += offset.point().x();
-//        return inp;
-//    }
-//}
-
 #endif // CGALMESHGENERATOR_H
