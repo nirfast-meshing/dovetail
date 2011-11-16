@@ -81,8 +81,10 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
     // Get the output file name and construct corresponding
     // inr filename and set inrFilename before calling
     // CGALMeshGenerator
+    ui->pushButton_GenerateMesh->setEnabled(false);
     if (Run_CGALMeshGenerator(mi) != 0)
         ui->lineEdit_infilename->setText("Error in Mesh Generator");
+    ui->pushButton_GenerateMesh->setEnabled(true);
 }
 
 int Run_CGALMeshGenerator(MetaImageIO& _mi)

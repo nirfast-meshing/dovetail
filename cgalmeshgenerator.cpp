@@ -27,7 +27,8 @@ CGALMeshGenerator::CGALMeshGenerator(MetaImageIO &metaimage) : metaimage_error(f
 
     fi2.setFile(fi1.dir(),foo1);
     outFilename = fi2.absoluteFilePath().toStdString();
-    std::cout << "\noutFilename is cgal is:" << outFilename << '\n';
+    std::cout << "\noutFilename of cgal is:" << outFilename << '\n';
+    std::cout.flush();
 }
 
 int CGALMeshGenerator::Execute()
