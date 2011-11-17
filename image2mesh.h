@@ -19,7 +19,11 @@ class Image2Mesh : public QWidget
 public:
     explicit Image2Mesh(QWidget *parent = 0);
     MetaImageIO mi;
+    CGALMeshGenerator mesher;
     ~Image2Mesh();
+
+
+    std::string makeFileName(std::string, std::string);
 
 private slots:
     void on_pushButton_BrowseImage_clicked();
@@ -36,6 +40,10 @@ private:
     bool imageDataLoaded;
 
     void UpdateImageProperties();
+    void UpdateMeshingCriteria();
+    void GetImageProperties();
+    void GetMeshCriteria();
+    int Run_CGALMeshGenerator();
 };
 
 #endif // IMAGE2MESH_H

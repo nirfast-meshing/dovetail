@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui 
-CONFIG   += debug
+#CONFIG   += debug
 
 TARGET = Dovetail
 TEMPLATE = app

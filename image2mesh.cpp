@@ -11,6 +11,18 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->pushButton_GenerateMesh->setEnabled(false);
+    // Regional refinement
+    ui->lineEdit_SpecialSize1->setText("0");
+    ui->lineEdit_SpecialID1->setText("0");
+
+    // Meshing settings
+    ui->lineEdit_TetSize->setText("3.0");
+    ui->lineEdit_TetQual->setText("3.0");
+    ui->lineEdit_FacetAngle->setText("25.0");
+    ui->lineEdit_FacetDistance->setText("3.0");
+    ui->lineEdit_FacetSize->setText("3.0");
+
+    ui->textEdit_StatusInfo->setReadOnly(true);
 //    connect(this, SIGNAL(UpdateImageProperties(QString)), ui->lineEdit_SDfilename, SLOT(setText(QString)));
 }
 
@@ -28,14 +40,29 @@ void Image2Mesh::on_pushButton_BrowseImage_clicked()
         if (QFileInfo(imageFile).suffix() == "mha")
         {
             ui->lineEdit_infilename->setText(imageFile);
+            mi.myheader = MetaHeader();
             mi._filename = imageFile.toStdString();
+
+            ui->pushButton_GenerateMesh->setEnabled(false);
+
             if (mi.ReadHeader() != 0)
             {
                 std::cerr << " Could not read " << imageFile.toStdString() << std::endl;
                 ui->lineEdit_infilename->setText(QString("Could not read file!"));
             }
-            ui->pushButton_GenerateMesh->setEnabled(true);
+            if (mi.ReadVolData() != 0)
+            {
+                std::cerr << " Could not read " << mi.DataFileName() << std::endl;
+                ui->textEdit_StatusInfo->setText(" Couldn't read file!");
+            }
+
+            mesher.outFilename = makeFileName(mi._filename,std::string(".mesh"));
+            ui->lineEdit_outputfilename->setText(QString::fromStdString(mesher.outFilename));
+
             UpdateImageProperties();
+            UpdateMeshingCriteria();
+
+            ui->pushButton_GenerateMesh->setEnabled(true);
         }
         this->lastImageFile = imageFile;
     }
@@ -43,37 +70,88 @@ void Image2Mesh::on_pushButton_BrowseImage_clicked()
         ui->lineEdit_infilename->clear();
 }
 
+void Image2Mesh::UpdateMeshingCriteria()
+{
+
+    ui->lineEdit_TetQual->setText(ui->lineEdit_TetQual->text());
+    ui->lineEdit_FacetAngle->setText(ui->lineEdit_FacetAngle->text());
+    ui->lineEdit_FacetDistance->setText(ui->lineEdit_FacetDistance->text());
+
+    std::vector<double>::iterator mind =
+            std::min_element(mi.myheader.elementsize.begin(), mi.myheader.elementsize.end());
+    ui->lineEdit_TetSize->setText(QString::number(*mind,'f',4));
+    ui->lineEdit_FacetSize->setText(QString::number(*mind,'f',4));
+
+    ui->textEdit_RegionInfo->clear();
+    ui->textEdit_RegionInfo->setReadOnly(true);
+    QString foo = QString("");
+//    std::cout << "labels length: " << mi.ImageLabels.size() << std::endl;
+    for (int i=0; i<mi.ImageLabels.size(); ++i)
+    {
+        foo += QString::number(mi.ImageLabels[i],'f',0) + ", ";
+    }
+    foo.remove(foo.length()-2,2);
+    foo.push_back('.');
+    ui->textEdit_RegionInfo->setText(foo);
+
+}
+
 void Image2Mesh::UpdateImageProperties()
 {
     char s[512];
     sprintf(s,"%d",mi.myheader.dimsize[0]);
     ui->lineEdit_Rows->setText(QString(s));
+    ui->lineEdit_Rows->setEnabled(false);
 
     sprintf(s,"%d",mi.myheader.dimsize[1]);
     ui->lineEdit_Cols->setText(QString(s));
+    ui->lineEdit_Cols->setEnabled(false);
 
     sprintf(s,"%d",mi.myheader.dimsize[2]);
     ui->lineEdit_Slices->setText(QString(s));
+    ui->lineEdit_Slices->setEnabled(false);
 
-    sprintf(s,"%.3f",mi.myheader.elementsize[0]);
+    sprintf(s,"%.6f",mi.myheader.elementsize[0]);
     ui->lineEdit_X->setText(s);
 
-    sprintf(s,"%.3f",mi.myheader.elementsize[1]);
+    sprintf(s,"%.6f",mi.myheader.elementsize[1]);
     ui->lineEdit_Y->setText(s);
 
-    sprintf(s,"%.3f",mi.myheader.elementsize[2]);
+    sprintf(s,"%.6f",mi.myheader.elementsize[2]);
     ui->lineEdit_Z->setText(s);
 
-    sprintf(s,"%.2f",mi.myheader.offset[0]);
+    sprintf(s,"%.4f",mi.myheader.offset[0]);
     ui->lineEdit_OffsetX->setText(s);
 
-    sprintf(s,"%.2f",mi.myheader.offset[1]);
+    sprintf(s,"%.4f",mi.myheader.offset[1]);
     ui->lineEdit_OffsetY->setText(s);
 
-    sprintf(s,"%.2f",mi.myheader.offset[2]);
+    sprintf(s,"%.4f",mi.myheader.offset[2]);
     ui->lineEdit_OffsetZ->setText(s);
 }
 
+void Image2Mesh::GetImageProperties()
+{
+    mi.myheader.elementsize[0] =  ui->lineEdit_X->text().toDouble();
+    mi.myheader.elementsize[1] =  ui->lineEdit_Y->text().toDouble();
+    mi.myheader.elementsize[2] =  ui->lineEdit_Z->text().toDouble();
+    mi.myheader.offset[0] = ui->lineEdit_OffsetX->text().toDouble();
+    mi.myheader.offset[1] = ui->lineEdit_OffsetY->text().toDouble();
+    mi.myheader.offset[2] = ui->lineEdit_OffsetZ->text().toDouble();
+
+}
+
+void Image2Mesh::GetMeshCriteria()
+{
+    mesher.cell_radius_edge = ui->lineEdit_TetQual->text().toDouble();
+    mesher.general_cell_size = ui->lineEdit_TetSize->text().toDouble();
+    mesher.special_size = ui->lineEdit_SpecialSize1->text().toDouble();
+    mesher.special_subdomain_label = ui->lineEdit_SpecialID1->text().toInt();
+
+    mesher.facet_angle = ui->lineEdit_FacetAngle->text().toDouble();
+    mesher.facet_distance = ui->lineEdit_FacetDistance->text().toDouble();
+    mesher.facet_size = ui->lineEdit_FacetSize->text().toDouble();
+}
 
 void Image2Mesh::on_pushButton_GenerateMesh_clicked()
 {
@@ -82,22 +160,46 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
     // inr filename and set inrFilename before calling
     // CGALMeshGenerator
     ui->pushButton_GenerateMesh->setEnabled(false);
-    if (Run_CGALMeshGenerator(mi) != 0)
-        ui->lineEdit_infilename->setText("Error in Mesh Generator");
+
+
+    GetImageProperties();
+    GetMeshCriteria();
+
+    if (Run_CGALMeshGenerator() != 0)
+        ui->textEdit_StatusInfo->setText("\nMesh generation failed!");
+    else
+    {
+        ui->textEdit_StatusInfo->clear();
+        QString foo = "\nMesh generation completed.";
+        foo += "\n No of nodes: " + QString::number(mesher.NoOfVertices());
+        foo += "\n No of vertices: " + QString::number(mesher.NoOfCells());
+        ui->textEdit_StatusInfo->setText(foo);
+    }
+
     ui->pushButton_GenerateMesh->setEnabled(true);
 }
 
-int Run_CGALMeshGenerator(MetaImageIO& _mi)
+int Image2Mesh::Run_CGALMeshGenerator()
 {
-    CGALMeshGenerator generator(_mi);
-    if (generator.metaimage_error)
+    ui->textEdit_StatusInfo->clear();
+    ui->textEdit_StatusInfo->setText("\nGenerating Mesh, please wait");
+    mesher.SetInputDomain(mi);
+    if (mesher.metaimage_error)
         return 1;
     else
     {
-        if (generator.Execute() != 0)
+        if (mesher.Execute() != 0)
             return 1; // Unsuccessful
         else
             return 0;
     }
 
+}
+
+std::string Image2Mesh::makeFileName(std::string _fn, std::string _ext)
+{
+    QFileInfo fi1(_fn.c_str());
+    QString foo = fi1.completeBaseName() + QString::fromStdString(_ext);
+    fi1.setFile(fi1.dir(), foo);
+    return fi1.absoluteFilePath().toStdString();
 }

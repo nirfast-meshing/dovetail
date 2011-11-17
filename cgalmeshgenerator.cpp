@@ -19,16 +19,45 @@ CGALMeshGenerator::CGALMeshGenerator(MetaImageIO &metaimage) : metaimage_error(f
     metaimage_header = metaimage.myheader;
 
     // Setup the outFilename
+    if (outFilename.empty())
+    {
+        QFileInfo fi1(_inrFilename.c_str());
+        QFileInfo fi2;
+        QString foo1 = fi1.completeBaseName();
+        QString foo2(".mesh");
+        foo1 += foo2;
+
+        fi2.setFile(fi1.dir(),foo1);
+        outFilename = fi2.absoluteFilePath().toStdString();
+        std::cout << "\noutFilename of cgal is:" << outFilename << '\n';
+        std::cout.flush();
+    }
+}
+
+int CGALMeshGenerator::SetInputDomain(MetaImageIO &metaimage)
+{
+    if (!metaimage.INRWritten())
+    {
+        if (metaimage.WriteINR()!=0)
+        {
+            metaimage_error = true;
+            return 1;
+        }
+    }
+    _inrFilename = metaimage.inrFilename;
+    _inrWritten = true;
+    metaimage_header = metaimage.myheader;
+
+    // Setup the outFilename
     QFileInfo fi1(_inrFilename.c_str());
     QFileInfo fi2;
-    QString foo1 = fi1.completeBaseName();
-    QString foo2(".mesh");
-    foo1 += foo2;
+    QString foo1 = fi1.completeBaseName() + ".mesh";
 
     fi2.setFile(fi1.dir(),foo1);
     outFilename = fi2.absoluteFilePath().toStdString();
     std::cout << "\noutFilename of cgal is:" << outFilename << '\n';
     std::cout.flush();
+    return 0;
 }
 
 int CGALMeshGenerator::Execute()
@@ -62,7 +91,12 @@ int CGALMeshGenerator::Execute()
 
 
 //    Tr tr = c3t3.triangulation();
-    K::Vector_3 _offset(metaimage_header.offset[0], metaimage_header.offset[1], metaimage_header.offset[2]);
+    K::Vector_3 _offset(
+                metaimage_header.offset[0],
+                metaimage_header.offset[1],
+                metaimage_header.offset[2]);
+
+    // Apply the offset
     for (Vertices_iterator itv=c3t3.triangulation().finite_vertices_begin(),
          itv_end=c3t3.triangulation().finite_vertices_end();
          itv!=itv_end;++itv)
@@ -71,12 +105,12 @@ int CGALMeshGenerator::Execute()
                 Weighted_point(itv->point().point()+_offset, itv->point().weight());
     }
 
-//    addoffset Offset(metaimage_header.offset[0], metaimage_header.offset[1], metaimage_header.offset[2]);
-//    std::transform(tr.finite_vertices_begin(), tr.finite_vertices_end(), tr.finite_vertices_begin(),Offset);
-
     // Output
     std::ofstream medit_file(outFilename.c_str());
     c3t3.output_to_medit(medit_file);
+
+    _no_vertices = c3t3.triangulation().number_of_vertices();
+    _no_cells = c3t3.number_of_cells_in_complex();
 
     return 0;
 }
@@ -92,4 +126,6 @@ void CGALMeshGenerator::initialize()
    special_subdomain_label = 0;
    outFilename = "";
    _inrFilename = "";
+   _no_vertices = 0;
+   _no_cells = 0;
 }

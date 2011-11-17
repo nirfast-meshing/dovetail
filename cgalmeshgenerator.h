@@ -36,7 +36,12 @@ public:
     CGALMeshGenerator();
     CGALMeshGenerator(std::string &);
     CGALMeshGenerator(MetaImageIO&);
+
     int Execute();
+    int SetInputDomain(MetaImageIO &);
+
+    size_t NoOfVertices() { return _no_vertices; }
+    size_t NoOfCells() { return _no_cells; }
 
     double facet_angle, facet_size, facet_distance,
            cell_radius_edge;
@@ -51,5 +56,7 @@ private:
     void initialize();
     bool _inrWritten;
     std::string _inrFilename;
+    size_t _no_vertices;
+    size_t _no_cells;
 };
 #endif // CGALMESHGENERATOR_H
