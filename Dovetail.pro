@@ -11,18 +11,21 @@ TEMPLATE = app
 
 #INCLUDEPATH += /Users/hamid_r_ghadyani/local/CGAL/3.8/include
 INCLUDEPATH += ../MyMetaImageIO/MyMetaImageIO
+INCLUDEPATH += ../header/
 
 SOURCES += main.cpp\
         image2mesh.cpp \
         cgalmeshgenerator.cpp \
-    	../MyMetaImageIO/MyMetaImageIO/metaimageio.cpp
+    	../MyMetaImageIO/MyMetaImageIO/metaimageio.cpp \
+    ../header/CStopWatch.cpp
     	
 
 HEADERS  += image2mesh.h \
         cgalmeshgenerator.h \
         cgal_header.h \
     	../MyMetaImageIO/MyMetaImageIO/MyMetaImageIO_global.h \
-    	../MyMetaImageIO/MyMetaImageIO/metaimageio.h
+    	../MyMetaImageIO/MyMetaImageIO/metaimageio.h \
+    ../header/CStopWatch.h
 
 LIBS += /usr/local/lib/libmpfr.a /usr/local/lib/libgmp.a \
     	/usr/local/lib/libboost_thread-mt.a \
@@ -35,6 +38,8 @@ QMAKE_CXXFLAGS += -Wall -fno-common \
         		  -frounding-math -fno-strict-aliasing
 
 FORMS    += image2mesh.ui
+
+
 
 
 
