@@ -33,46 +33,21 @@ Image2Mesh::~Image2Mesh()
 
 void Image2Mesh::on_pushButton_BrowseImage_clicked()
 {
-    const QString imageFile = QFileDialog::getOpenFileName(this, tr("Select Image file(s)"),
+    QString imageFile = QFileDialog::getOpenFileName(this, tr("Select Image file(s)"),
                                                      "",tr("Images (*.bmp *.tiff *.png *.mha)"),
                                                      NULL, QFileDialog::ReadOnly);
-    if (! imageFile.isEmpty() ) {
-        if (QFileInfo(imageFile).suffix() == "mha")
-        {
-            ui->lineEdit_infilename->setText(imageFile);
-            mi.myheader = MetaHeader();
-            mi._filename = imageFile.toStdString();
-
-            ui->pushButton_GenerateMesh->setEnabled(false);
-
-            if (mi.ReadHeader() != 0)
-            {
-                std::cerr << " Could not read " << imageFile.toStdString() << std::endl;
-                ui->lineEdit_infilename->setText(QString("Could not read file!"));
-            }
-            if (mi.ReadVolData() != 0)
-            {
-                std::cerr << " Could not read " << mi.DataFileName() << std::endl;
-                ui->textEdit_StatusInfo->setText(" Couldn't read file!");
-            }
-
-            mesher.outFilename = makeFileName(mi._filename,std::string(".mesh"));
-            ui->lineEdit_outputfilename->setText(QString::fromStdString(mesher.outFilename));
-
-            UpdateImageProperties();
-            UpdateMeshingCriteria();
-
-            ui->pushButton_GenerateMesh->setEnabled(true);
-        }
-        this->lastImageFile = imageFile;
-    }
-    else
-        ui->lineEdit_infilename->clear();
+    _loadImage(imageFile);
 }
 
 void Image2Mesh::UpdateMeshingCriteria()
 {
-
+    ui->textEdit_StatusInfo->clear();
+    if (mi.ImageLabels.size() > 10)
+    {
+        QString foo = "There are more than 10 regions in the image!";
+        foo += "\nMesh generation process can be lengthy and unsuccessful.";
+        ui->textEdit_StatusInfo->setText(foo);
+    }
     ui->lineEdit_TetQual->setText(ui->lineEdit_TetQual->text());
     ui->lineEdit_FacetAngle->setText(ui->lineEdit_FacetAngle->text());
     ui->lineEdit_FacetDistance->setText(ui->lineEdit_FacetDistance->text());
@@ -93,6 +68,11 @@ void Image2Mesh::UpdateMeshingCriteria()
     foo.remove(foo.length()-2,2);
     foo.push_back('.');
     ui->textEdit_RegionInfo->setText(foo);
+    ui->label_AvailRegionIDs->setText(
+                QString("Avail. region IDs in image:")+
+                QString(" (total of ")+
+                QString::number(mi.ImageLabels.size())+
+                QString(")"));
 
 }
 
@@ -202,4 +182,56 @@ std::string Image2Mesh::makeFileName(std::string _fn, std::string _ext)
     QString foo = fi1.completeBaseName() + QString::fromStdString(_ext);
     fi1.setFile(fi1.dir(), foo);
     return fi1.absoluteFilePath().toStdString();
+}
+
+void Image2Mesh::on_lineEdit_infilename_returnPressed()
+{
+    _loadImage(ui->lineEdit_infilename->text());
+    std::cout << "lineEdit_infilename: " << ui->lineEdit_infilename->text().toStdString();
+}
+
+void Image2Mesh::_loadImage(QString imageFile)
+{
+    if (! imageFile.isEmpty() ) {
+            if (QFileInfo(imageFile).suffix() == "mha")
+            {
+                ui->lineEdit_infilename->setText(imageFile);
+                mi.myheader = MetaHeader();
+                mi._filename = imageFile.toStdString();
+
+                ui->pushButton_GenerateMesh->setEnabled(false);
+
+                if (mi.ReadHeader() != 0)
+                {
+                    std::cerr << " Could not read " << imageFile.toStdString() << std::endl;
+                    ui->textEdit_StatusInfo->setText(QString(" Could not read file: ") +
+                                                     QString::fromStdString(mi._filename));
+                    QMessageBox::information(0,"error",QString(" Could not read file: ") +
+                                             QString::fromStdString(mi._filename));
+                    ui->textEdit_RegionInfo->clear();
+                    return;
+                }
+                if (mi.ReadVolData() != 0)
+                {
+                    std::cerr << " Could not read " << mi.DataFileName() << std::endl;
+                    ui->textEdit_StatusInfo->setText(QString(" Could not read file: ") +
+                                                     QString::fromStdString(mi._filename));
+                    QMessageBox::information(0,"error",QString(" Could not read file: ") +
+                                             QString::fromStdString(mi._filename));
+                    ui->textEdit_RegionInfo->clear();
+                    return;
+                }
+
+                mesher.outFilename = makeFileName(mi._filename,std::string(".mesh"));
+                ui->lineEdit_outputfilename->setText(QString::fromStdString(mesher.outFilename));
+
+                UpdateImageProperties();
+                UpdateMeshingCriteria();
+
+                ui->pushButton_GenerateMesh->setEnabled(true);
+            }
+            this->lastImageFile = imageFile;
+        }
+        else
+            ui->lineEdit_infilename->clear();
 }

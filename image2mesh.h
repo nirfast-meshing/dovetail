@@ -30,6 +30,8 @@ private slots:
 
     void on_pushButton_GenerateMesh_clicked();
 
+    void on_lineEdit_infilename_returnPressed();
+
 signals:
 
 
@@ -44,6 +46,8 @@ private:
     void GetImageProperties();
     void GetMeshCriteria();
     int Run_CGALMeshGenerator();
+
+    void _loadImage(QString);
 };
 
 #endif // IMAGE2MESH_H
