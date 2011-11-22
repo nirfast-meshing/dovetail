@@ -11,6 +11,7 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->pushButton_GenerateMesh->setEnabled(false);
+    ui->pushButton_ViewMesh->setEnabled(false);
     // Regional refinement
     ui->lineEdit_SpecialSize1->setText("0");
     ui->lineEdit_SpecialID1->setText("0");
@@ -23,6 +24,8 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     ui->lineEdit_FacetSize->setText("3.0");
 
     ui->textEdit_StatusInfo->setReadOnly(true);
+    this->_populatedVTKPolyData = false;
+    this->imageDataLoaded = false;
 //    connect(this, SIGNAL(UpdateImageProperties(QString)), ui->lineEdit_SDfilename, SLOT(setText(QString)));
 }
 
@@ -154,6 +157,16 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
         foo += "\n No of nodes: " + QString::number(mesher.NoOfVertices());
         foo += "\n No of vertices: " + QString::number(mesher.NoOfCells());
         ui->textEdit_StatusInfo->setText(foo);
+        int st = PopulateVTKPolyData();
+        if (st != 0)
+        {
+            ui->textEdit_StatusInfo->insertPlainText(" Can not display this mesh!");
+        }
+        else
+        {
+            ui->textEdit_StatusInfo->insertPlainText(" Click 'View Mesh' now!");
+            ui->pushButton_ViewMesh->setEnabled(true);
+        }
     }
 
     ui->pushButton_GenerateMesh->setEnabled(true);
@@ -234,4 +247,76 @@ void Image2Mesh::_loadImage(QString imageFile)
         }
         else
             ui->lineEdit_infilename->clear();
+}
+
+void Image2Mesh::on_pushButton_ViewMesh_clicked()
+{
+    QString imageFile("/Users/hamid_r_ghadyani/2.vtk");
+
+    ui->tabWidget->setCurrentIndex(1);
+    VTK_CREATE(vtkPolyDataReader, reader);
+    reader->SetFileName(imageFile.toStdString().c_str());
+    reader->Update();
+    VTK_CREATE(vtkPolyDataMapper, meshMapper);
+    meshMapper->ImmediateModeRenderingOn();
+    meshMapper->SetInputConnection(reader->GetOutputPort());
+
+    VTK_CREATE(vtkExtractEdges, edges);
+    edges->SetInput(reader->GetOutput());
+    VTK_CREATE(vtkPolyDataMapper, edge_mapper);
+    edge_mapper->ImmediateModeRenderingOn();
+    edge_mapper->SetInput(edges->GetOutput());
+
+
+
+
+    VTK_CREATE(vtkActor, meshActor);
+    VTK_CREATE(vtkActor, edgeActor);
+    meshActor->SetMapper( meshMapper );
+    edgeActor->SetMapper( edge_mapper );
+    edgeActor->GetProperty()->SetColor(0.5,0.2,0.0);
+
+    VTK_CREATE(vtkRenderer, ren1);
+    ren1->AddActor( meshActor );
+    ren1->AddActor( edgeActor );
+    ren1->SetBackground( 0.1, 0.2, 0.1 );
+    vtkPolyDataMapper::SetResolveCoincidentTopologyToPolygonOffset();
+//    VTK_CREATE(vtkRenderWindow, renWin);
+//    renWin->AddRenderer( ren1 );
+//    renWin->SetSize( 300, 300 );
+
+    this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(ren1);
+
+//    if (!_populatedVTKPolyData)
+//    {
+//        int st = PopulateVTKPolyData();
+//        if (st != 0)
+//        {
+
+//        }
+//        else
+//        {
+//            ShowMesh();
+//        }
+//    }
+}
+
+int Image2Mesh::PopulateVTKPolyData()
+{
+
+//    std::map<Vertex_handle, uint64_t> V;
+//    uint64_t inum = 1;
+//    VTK_CREATE(vtkPoints, points);
+
+//    for( Vertices_iterator vit = tr.finite_vertices_begin();
+//         vit != tr.finite_vertices_end();
+//         ++vit)
+//    {
+//        V[vit] = inum++;
+//        Point_3 p = vit->point();
+//        points->InsertNextPoint(CGAL::to_double(p.x()),
+//                                CGAL::to_double(p.y()),
+//                                CGAL::to_double(p.z()));
+//    }
+//    VTK_CREATE(vtkCellArray,
 }

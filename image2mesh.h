@@ -32,6 +32,8 @@ private slots:
 
     void on_lineEdit_infilename_returnPressed();
 
+    void on_pushButton_ViewMesh_clicked();
+
 signals:
 
 
@@ -40,6 +42,7 @@ private:
 
     QString lastImageFile;
     bool imageDataLoaded;
+    bool _populatedVTKPolyData;
 
     void UpdateImageProperties();
     void UpdateMeshingCriteria();
@@ -48,6 +51,8 @@ private:
     int Run_CGALMeshGenerator();
 
     void _loadImage(QString);
+    int PopulateVTKPolyData();
+    int ShowMesh();
 };
 
 #endif // IMAGE2MESH_H

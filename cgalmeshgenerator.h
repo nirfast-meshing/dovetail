@@ -5,6 +5,26 @@
 
 #include "cgal_header.h"
 
+#include <vtkDataObjectToTable.h>
+#include <vtkElevationFilter.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkQtTableView.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <vtkVectorText.h>
+
+#include "vtkPolyDataReader.h"
+#include "vtkRenderWindowInteractor.h"
+#include "vtkExtractEdges.h"
+#include "vtkCamera.h"
+#include "vtkActor.h"
+#include "vtkInteractorStyleTrackballCamera.h"
+#include "vtkProperty.h"
+#include "vtkPoints.h"
+#include "vtkSmartPointer.h"
+#define VTK_CREATE(type, name) \
+  vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+
 // Vector_3<Kernel> v ( double x, double y, double z);
 // Aff_transformation_3<Kernel> t ( const Translation, Vector_3<Kernel> v);
 // Point_3<Kernel> t.operator() ( Point_3<Kernel> p) const
@@ -42,6 +62,8 @@ public:
 
     size_t NoOfVertices() { return _no_vertices; }
     size_t NoOfCells() { return _no_cells; }
+
+    C3t3 c3t3;
 
     double facet_angle, facet_size, facet_distance,
            cell_radius_edge;

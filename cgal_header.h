@@ -26,7 +26,10 @@ typedef CGAL::Mesh_constant_domain_field_3<Mesh_domain::R,
                                            Mesh_domain::Index> Sizing_field;
 
 typedef Tr::Finite_vertices_iterator Vertices_iterator;
+typedef C3t3::Cells_in_complex_iterator Cell_iterator;
 typedef Tr::Weighted_point Weighted_point;
+typedef Tr::Vertex_handle Vertex_handle;
+typedef Tr::Point Point_3;
 
 // To avoid verbose function and named parameters call
 using namespace CGAL::parameters;
