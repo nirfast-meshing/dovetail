@@ -8,35 +8,16 @@ add_definitions ( -Wall )
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 
-# message(WARNING ${CMAKE_MODULE_PATH})
 LIST(APPEND CMAKE_MODULE_PATH "/usr/local/lib/CGAL")
-# message(WARNING ${CMAKE_MODULE_PATH})
-
 find_package ( Qt4 REQUIRED COMPONENTS QTCORE QTGUI)
 include ( ${QT_USE_FILE} )
-
-
 find_package (CGAL REQUIRED)
 include ( ${CGAL_USE_FILE} )
-# message(WARNING ${CGAL_ImageIO_LIBRARY} ${CGAL_Core_LIBRARY})
-
 find_package (Boost REQUIRED COMPONENTS thread)
 
 # find_package (OpenGL REQUIRED)
-
-
-
-
-# LIST(APPEND CMAKE_MODULE_PATH "/Users/hamid_r_ghadyani/local/CGAL/3.8/lib/CGAL")
-
 # find_package (GMP REQUIRED)
-find_package (ZLIB REQUIRED)
-
-
-
-
-
-
+# find_package (ZLIB REQUIRED)
 
 include_directories (
 	${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
@@ -80,13 +61,15 @@ ENDIF()
 # QT4
 set (QTLIBS_ ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
 #CGAL
-set (CGALLIBS_ ${Boost_LIBRARIES} ${CGAL_Core_LIBRARY} ${CGAL_ImageIO_LIBRARY}) #${Boost_LIBRARIES}
+set (CGALLIBS_ ${Boost_LIBRARIES} ${CGAL_Core_LIBRARY} ${CGAL_ImageIO_LIBRARY}
+     ${CGAL_ImageIO_3RD_PARTY_LIBRARIES})
 # OpenGL
 # set (OPENGL_ ${OPENGL_gl_LIBRARY} ${ZLIB_LIBRARIES})
 
 set (LIBS_ ${CGALLIBS_} ${QTLIBS_})
 
 
+target_link_libraries ( Dovetail ${LIBS_})
 
 
-target_link_libraries ( Dovetail ${LIBS_} ${CGAL_ImageIO_3RD_PARTY_LIBRARIES})
+
