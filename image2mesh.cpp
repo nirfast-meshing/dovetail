@@ -61,7 +61,7 @@ void Image2Mesh::UpdateMeshingCriteria()
     ui->textEdit_RegionInfo->setReadOnly(true);
     QString foo = QString("");
 //    std::cout << "labels length: " << mi.ImageLabels.size() << std::endl;
-    for (int i=0; i<mi.ImageLabels.size(); ++i)
+    for (unsigned int i=0; i<mi.ImageLabels.size(); ++i)
     {
         foo += QString::number(mi.ImageLabels[i],'f',0) + ", ";
     }
