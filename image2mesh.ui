@@ -30,7 +30,7 @@
    </property>
    <widget class="QWidget" name="tab_Mesher">
     <attribute name="title">
-     <string>Meshr</string>
+     <string>Mesher</string>
     </attribute>
     <widget class="QGroupBox" name="groupBox_Input">
      <property name="geometry">

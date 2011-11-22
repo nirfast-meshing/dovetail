@@ -155,7 +155,7 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
         ui->textEdit_StatusInfo->clear();
         QString foo = "\nMesh generation completed.";
         foo += "\n No of nodes: " + QString::number(mesher.NoOfVertices());
-        foo += "\n No of vertices: " + QString::number(mesher.NoOfCells());
+        foo += "\n No of elements: " + QString::number(mesher.NoOfCells());
         ui->textEdit_StatusInfo->setText(foo);
         int st = PopulateVTKPolyData();
         if (st != 0)
@@ -164,7 +164,7 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
         }
         else
         {
-            ui->textEdit_StatusInfo->insertPlainText(" Click 'View Mesh' now!");
+            ui->textEdit_StatusInfo->insertPlainText("Click 'View Mesh' now!");
             ui->pushButton_ViewMesh->setEnabled(true);
         }
     }
