@@ -1,3 +1,4 @@
+# -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -DVTK_DIR=/Users/hamid_r_ghadyani/local/VTK/nightly/112111/lib/vtk-5.9
 project( Dovetail )
 
 cmake_minimum_required( VERSION 2.6 )
@@ -7,6 +8,15 @@ add_definitions ( -Wall )
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
+
+IF(NOT VTK_BINARY_DIR)
+FIND_PACKAGE(VTK)
+IF(NOT VTK_DIR)
+  MESSAGE(FATAL_ERROR "Please set VTK_DIR.")
+ENDIF(NOT VTK_DIR)
+INCLUDE(${VTK_USE_FILE})
+ENDIF(NOT VTK_BINARY_DIR)
+
 
 LIST(APPEND CMAKE_MODULE_PATH "/usr/local/lib/CGAL")
 find_package ( Qt4 REQUIRED COMPONENTS QTCORE QTGUI)
@@ -19,14 +29,15 @@ find_package (Boost REQUIRED COMPONENTS thread)
 # find_package (GMP REQUIRED)
 # find_package (ZLIB REQUIRED)
 
+
 include_directories (
 	${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 	${QT_QTCORE_INCLUDE_DIR} ${QT_QTGUI_INCLUDE_DIR}
 	../MyMetaImageIO/MyMetaImageIO
 	../header/)
 set ( Dovetail_HDRS
+    cgal_header.h
 	cgalmeshgenerator.h
-	cgal_header.h
 	../MyMetaImageIO/MyMetaImageIO/MyMetaImageIO_global.h
 	../MyMetaImageIO/MyMetaImageIO/metaimageio.h
 	../header/CStopWatch.h
@@ -66,8 +77,16 @@ set (CGALLIBS_ ${Boost_LIBRARIES} ${CGAL_Core_LIBRARY} ${CGAL_ImageIO_LIBRARY}
 # OpenGL
 # set (OPENGL_ ${OPENGL_gl_LIBRARY} ${ZLIB_LIBRARIES})
 
-set (LIBS_ ${CGALLIBS_} ${QTLIBS_})
+set(QVTK_ QVTK
+  vtkRendering
+  vtkGraphics
+  vtkIO
+  vtkCommon
+  vtkInfovis
+  vtkViews
+)
 
+set (LIBS_ ${CGALLIBS_} ${QTLIBS_} ${QVTK_})
 
 target_link_libraries ( Dovetail ${LIBS_})
 
