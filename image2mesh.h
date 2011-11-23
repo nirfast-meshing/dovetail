@@ -53,7 +53,7 @@ private:
     void _loadImage(QString);
     int PopulateVTKPolyData();
     int ShowMesh();
-
+    double _tetscale;
     vtkUnstructuredGrid* _vtkuG;
 };
 

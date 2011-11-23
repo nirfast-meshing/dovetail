@@ -26,13 +26,15 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     ui->textEdit_StatusInfo->setReadOnly(true);
     this->_populatedVTKPolyData = false;
     this->imageDataLoaded = false;
+    this->_tetscale = 1.6;
 //    connect(this, SIGNAL(UpdateImageProperties(QString)), ui->lineEdit_SDfilename, SLOT(setText(QString)));
 }
 
 Image2Mesh::~Image2Mesh()
 {
     delete ui;
-    _vtkuG->Delete();
+    if (_vtkuG)
+        _vtkuG->Delete();
 }
 
 void Image2Mesh::on_pushButton_BrowseImage_clicked()
@@ -58,8 +60,8 @@ void Image2Mesh::UpdateMeshingCriteria()
 
     std::vector<double>::iterator mind =
             std::min_element(mi.myheader.elementsize.begin(), mi.myheader.elementsize.end());
-    ui->lineEdit_TetSize->setText(QString::number(*mind,'f',4));
-    ui->lineEdit_FacetSize->setText(QString::number(*mind,'f',4));
+    ui->lineEdit_TetSize->setText(QString::number(*mind * _tetscale,'f',4));
+    ui->lineEdit_FacetSize->setText(QString::number(*mind * _tetscale,'f',4));
 
     ui->textEdit_RegionInfo->clear();
     ui->textEdit_RegionInfo->setReadOnly(true);
@@ -155,8 +157,8 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
     {
         ui->textEdit_StatusInfo->clear();
         QString foo = "\nMesh generation completed.";
-        foo += "\n No of nodes: " + QString::number(mesher.NoOfVertices());
-        foo += "\n No of elements: " + QString::number(mesher.NoOfCells());
+        foo += "\n  No of nodes: " + QString::number(mesher.NoOfVertices());
+        foo += "\n  No of elements: " + QString::number(mesher.NoOfCells());
         ui->textEdit_StatusInfo->setText(foo);
         int st = PopulateVTKPolyData();
         if (st != 0)
