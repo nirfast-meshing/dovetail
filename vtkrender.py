@@ -101,3 +101,5 @@ iren.SetInteractorStyle(style)
 #
 iren.Initialize()
 iren.Start()
+
+http://stackoverflow.com/questions/7548966/how-to-display-only-triangle-boundaries-on-textured-surface-in-vtk
