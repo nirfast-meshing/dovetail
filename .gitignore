@@ -5,3 +5,7 @@ moc_*
 *.app
 *.user
 Makefile
+CMakeFiles
+CMakeCache.txt
+Dovetail
+cmake_install.cmake
