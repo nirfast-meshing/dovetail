@@ -32,6 +32,7 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
 Image2Mesh::~Image2Mesh()
 {
     delete ui;
+    _vtkuG->Delete();
 }
 
 void Image2Mesh::on_pushButton_BrowseImage_clicked()
@@ -251,41 +252,88 @@ void Image2Mesh::_loadImage(QString imageFile)
 
 void Image2Mesh::on_pushButton_ViewMesh_clicked()
 {
-    QString imageFile("/Users/hamid_r_ghadyani/2.vtk");
 
     ui->tabWidget->setCurrentIndex(1);
-    VTK_CREATE(vtkPolyDataReader, reader);
-    reader->SetFileName(imageFile.toStdString().c_str());
-    reader->Update();
-    VTK_CREATE(vtkPolyDataMapper, meshMapper);
-    meshMapper->ImmediateModeRenderingOn();
-    meshMapper->SetInputConnection(reader->GetOutputPort());
+    VTK_CREATE(vtkGeometryFilter, geomFilter);
+    geomFilter->AddInput(_vtkuG);
 
-    VTK_CREATE(vtkExtractEdges, edges);
-    edges->SetInput(reader->GetOutput());
-    VTK_CREATE(vtkPolyDataMapper, edge_mapper);
-    edge_mapper->ImmediateModeRenderingOn();
-    edge_mapper->SetInput(edges->GetOutput());
+    VTK_CREATE(vtkPolyDataMapper, elementsMapper);
+    elementsMapper->SetInput(geomFilter->GetOutput());
 
+    VTK_CREATE(vtkActor, elementsActor);
+    elementsActor->SetMapper(elementsMapper);
 
+    VTK_CREATE(vtkProperty, elementsProp);
+    elementsProp = elementsActor->GetProperty();
+    elementsProp->SetColor(0.1,0.27,0.75);
+    elementsProp->SetDiffuse(0);
+    elementsProp->SetAmbient(1);
+    elementsProp->SetInterpolationToFlat();
 
+    VTK_CREATE(vtkExtractEdges, edgesFilter);
+    edgesFilter->SetInput(geomFilter->GetOutput());
 
-    VTK_CREATE(vtkActor, meshActor);
-    VTK_CREATE(vtkActor, edgeActor);
-    meshActor->SetMapper( meshMapper );
-    edgeActor->SetMapper( edge_mapper );
-    edgeActor->GetProperty()->SetColor(0.5,0.2,0.0);
+//    VTK_CREATE(vtkTubeFilter, tubeFilter);
+//    tubeFilter->SetInput(edgesFilter->GetOutput());
+//    tubeFilter->SetRadius(0.1);
+
+    VTK_CREATE(vtkPolyDataMapper, edgesMapper);
+    edgesMapper->SetInput(edgesFilter->GetOutput());
+    edgesMapper->ScalarVisibilityOff();
+
+    VTK_CREATE(vtkActor,edgesActor);
+    edgesActor->SetMapper(edgesMapper);
+
+    VTK_CREATE(vtkProperty, edgesProp);
+    edgesProp = edgesActor->GetProperty();
+    edgesProp->SetColor(0.75,0.75,0.75);
+    edgesProp->SetDiffuse(0);
+    edgesProp->SetAmbient(1);
+    edgesProp->SetLineWidth(1);
 
     VTK_CREATE(vtkRenderer, ren1);
-    ren1->AddActor( meshActor );
-    ren1->AddActor( edgeActor );
-    ren1->SetBackground( 0.1, 0.2, 0.1 );
+    ren1->SetBackground( 0.1, 0.1, 0.1 );
+    ren1->AddActor(elementsActor);
+    ren1->AddActor(edgesActor);
+
     vtkPolyDataMapper::SetResolveCoincidentTopologyToPolygonOffset();
+    this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(ren1);
+
+//    QString imageFile("/Users/hamid_r_ghadyani/2.vtk");
+
+//    ui->tabWidget->setCurrentIndex(1);
+//    VTK_CREATE(vtkPolyDataReader, reader);
+//    reader->SetFileName(imageFile.toStdString().c_str());
+//    reader->Update();
+//    VTK_CREATE(vtkPolyDataMapper, meshMapper);
+//    meshMapper->ImmediateModeRenderingOn();
+//    meshMapper->SetInputConnection(reader->GetOutputPort());
+
+//    VTK_CREATE(vtkExtractEdges, edges);
+//    edges->SetInput(reader->GetOutput());
+//    VTK_CREATE(vtkPolyDataMapper, edge_mapper);
+//    edge_mapper->ImmediateModeRenderingOn();
+//    edge_mapper->SetInput(edges->GetOutput());
+
+
+
+
+//    VTK_CREATE(vtkActor, meshActor);
+//    VTK_CREATE(vtkActor, edgeActor);
+//    meshActor->SetMapper( meshMapper );
+//    edgeActor->SetMapper( edge_mapper );
+//    edgeActor->GetProperty()->SetColor(0.5,0.2,0.0);
+
+//    VTK_CREATE(vtkRenderer, ren1);
+//    ren1->AddActor( meshActor );
+//    ren1->AddActor( edgeActor );
+//    ren1->SetBackground( 0.1, 0.2, 0.1 );
+//    vtkPolyDataMapper::SetResolveCoincidentTopologyToPolygonOffset();
 //    VTK_CREATE(vtkRenderWindow, renWin);
 //    renWin->AddRenderer( ren1 );
 //    renWin->SetSize( 300, 300 );
 
-    this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(ren1);
+//    this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(ren1);
 
 //    if (!_populatedVTKPolyData)
 //    {
@@ -303,20 +351,10 @@ void Image2Mesh::on_pushButton_ViewMesh_clicked()
 
 int Image2Mesh::PopulateVTKPolyData()
 {
-
-//    std::map<Vertex_handle, uint64_t> V;
-//    uint64_t inum = 1;
-//    VTK_CREATE(vtkPoints, points);
-
-//    for( Vertices_iterator vit = tr.finite_vertices_begin();
-//         vit != tr.finite_vertices_end();
-//         ++vit)
-//    {
-//        V[vit] = inum++;
-//        Point_3 p = vit->point();
-//        points->InsertNextPoint(CGAL::to_double(p.x()),
-//                                CGAL::to_double(p.y()),
-//                                CGAL::to_double(p.z()));
-//    }
-//    VTK_CREATE(vtkCellArray,
+    _vtkuG = 0;
+    _vtkuG = CGAL::output_c3t3_to_vtk_unstructured_grid<C3t3>(this->mesher.c3t3);
+    if (!_vtkuG)
+        return 1;
+    else
+        return 0;
 }

@@ -22,6 +22,11 @@
 #include "vtkProperty.h"
 #include "vtkPoints.h"
 #include "vtkSmartPointer.h"
+#include "vtkGeometryFilter.h"
+#include "vtkTubeFilter.h"
+
+#include "CGAL/IO/Complex_3_in_triangulation_3_to_vtk.h"
+
 #define VTK_CREATE(type, name) \
   vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 

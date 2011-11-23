@@ -53,6 +53,8 @@ private:
     void _loadImage(QString);
     int PopulateVTKPolyData();
     int ShowMesh();
+
+    vtkUnstructuredGrid* _vtkuG;
 };
 
 #endif // IMAGE2MESH_H

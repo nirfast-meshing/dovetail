@@ -1,10 +1,11 @@
 # -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -DVTK_DIR=/Users/hamid_r_ghadyani/local/VTK/nightly/112111/lib/vtk-5.9
+# -DVTK_DIR=/Volumes/Home/foo/local/VTK/5.9.0/lib/vtk-5.9 -DQT_QMAKE_EXECUTABLE=/Volumes/Home/foo/local/Qt/4.7.4/bin/qmake -DCGAL_DIR=/Volumes/Home/foo/local/CGAL/3.9/lib/CGAL/
 project( Dovetail )
 
 cmake_minimum_required( VERSION 2.6 )
 cmake_policy(SET CMP0017 NEW)
 set ( CMAKE_BUILD_TYPE Release )
-add_definitions ( -Wall )
+add_definitions ( -Wall -Wno-deprecated)
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
