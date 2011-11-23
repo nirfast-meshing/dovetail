@@ -87,7 +87,7 @@ int CGALMeshGenerator::Execute()
                            cell_radius_edge, cell_size=size);
 
     // Meshing
-    C3t3 c3t3 = CGAL::make_mesh_3<C3t3>(domain, criteria);
+    c3t3 = CGAL::make_mesh_3<C3t3>(domain, criteria);
 
 
 //    Tr tr = c3t3.triangulation();
