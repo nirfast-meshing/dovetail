@@ -61,7 +61,7 @@ void Image2Mesh::UpdateMeshingCriteria()
     ui->textEdit_RegionInfo->setReadOnly(true);
     QString foo = QString("");
 //    std::cout << "labels length: " << mi.ImageLabels.size() << std::endl;
-    for (int i=0; i<mi.ImageLabels.size(); ++i)
+    for (unsigned int i=0; i<mi.ImageLabels.size(); ++i)
     {
         foo += QString::number(mi.ImageLabels[i],'f',0) + ", ";
     }
@@ -152,8 +152,19 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
         ui->textEdit_StatusInfo->clear();
         QString foo = "\nMesh generation completed.";
         foo += "\n No of nodes: " + QString::number(mesher.NoOfVertices());
-        foo += "\n No of vertices: " + QString::number(mesher.NoOfCells());
+        foo += "\n No of elements: " + QString::number(mesher.NoOfCells());
         ui->textEdit_StatusInfo->setText(foo);
+
+        int st=0;
+        if (st != 0)
+        {
+            ui->textEdit_StatusInfo->insertPlainText(" Can not display this mesh!");
+        }
+        else
+        {
+            ui->textEdit_StatusInfo->insertPlainText("Click 'View Mesh' now!");
+
+        }
     }
 
     ui->pushButton_GenerateMesh->setEnabled(true);
