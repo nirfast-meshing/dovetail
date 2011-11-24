@@ -24,9 +24,10 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     ui->lineEdit_FacetSize->setText("3.0");
 
     ui->textEdit_StatusInfo->setReadOnly(true);
-    this->_populatedVTKPolyData = false;
-    this->imageDataLoaded = false;
-    this->_tetscale = 1.6;
+    _populatedVTKPolyData = false;
+    imageDataLoaded = false;
+    _tetscale = 1.6;
+    _successimageloading = false;
 //    connect(this, SIGNAL(UpdateImageProperties(QString)), ui->lineEdit_SDfilename, SLOT(setText(QString)));
 }
 
@@ -147,7 +148,13 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
     // CGALMeshGenerator
     ui->pushButton_GenerateMesh->setEnabled(false);
 
-
+    if (_successimageloading == false)
+    {
+        ui->textEdit_StatusInfo->clear();
+        ui->textEdit_StatusInfo->insertPlainText("No image stack is loaded");
+        ui->pushButton_ViewMesh->setEnabled(false);
+        return;
+    }
     GetImageProperties();
     GetMeshCriteria();
 
@@ -203,11 +210,11 @@ std::string Image2Mesh::makeFileName(std::string _fn, std::string _ext)
 void Image2Mesh::on_lineEdit_infilename_returnPressed()
 {
     _loadImage(ui->lineEdit_infilename->text());
-    std::cout << "lineEdit_infilename: " << ui->lineEdit_infilename->text().toStdString();
 }
 
 void Image2Mesh::_loadImage(QString imageFile)
 {
+    _successimageloading = false;
     if (! imageFile.isEmpty() ) {
             if (QFileInfo(imageFile).suffix() == "mha")
             {
@@ -216,7 +223,7 @@ void Image2Mesh::_loadImage(QString imageFile)
                 mi._filename = imageFile.toStdString();
 
                 ui->pushButton_GenerateMesh->setEnabled(false);
-
+                ui->pushButton_ViewMesh->setEnabled(false);
                 if (mi.ReadHeader() != 0)
                 {
                     std::cerr << " Could not read " << imageFile.toStdString() << std::endl;
@@ -234,17 +241,32 @@ void Image2Mesh::_loadImage(QString imageFile)
                                                      QString::fromStdString(mi._filename));
                     QMessageBox::information(0,"error",QString(" Could not read file: ") +
                                              QString::fromStdString(mi._filename));
-                    ui->textEdit_RegionInfo->clear();
                     return;
                 }
 
-                mesher.outFilename = makeFileName(mi._filename,std::string(".mesh"));
-                ui->lineEdit_outputfilename->setText(QString::fromStdString(mesher.outFilename));
+                if (mi.myheader.elementsize[2] == 1)
+                {
+                    ui->textEdit_StatusInfo->setText("Input data contains only 1 slice!\nCan't create mesh!");
+                    UpdateImageProperties();
 
-                UpdateImageProperties();
-                UpdateMeshingCriteria();
+                    QString lineEditStyle("QLineEdit {background: red;}");
+                    ui->lineEdit_Slices->setStyleSheet(lineEditStyle);
 
-                ui->pushButton_GenerateMesh->setEnabled(true);
+                    ui->lineEdit_outputfilename->clear();
+                    ui->pushButton_GenerateMesh->setEnabled(false);
+                    _successimageloading = false;
+                }
+                else
+                {
+                    ui->lineEdit_Slices->setStyleSheet(styleSheet());
+                    mesher.outFilename = makeFileName(mi._filename,std::string(".mesh"));
+                    ui->lineEdit_outputfilename->setText(QString::fromStdString(mesher.outFilename));
+
+                    UpdateImageProperties();
+                    UpdateMeshingCriteria();
+                    ui->pushButton_GenerateMesh->setEnabled(true);
+                    _successimageloading = true;
+                }
             }
             this->lastImageFile = imageFile;
         }
@@ -353,10 +375,18 @@ void Image2Mesh::on_pushButton_ViewMesh_clicked()
 
 int Image2Mesh::PopulateVTKPolyData()
 {
+    if (_populatedVTKPolyData)
+        _vtkuG->Delete();
     _vtkuG = 0;
     _vtkuG = CGAL::output_c3t3_to_vtk_unstructured_grid<C3t3>(this->mesher.c3t3);
     if (!_vtkuG)
+    {
+        _populatedVTKPolyData = false;
         return 1;
+    }
     else
+    {
+        _populatedVTKPolyData = true;
         return 0;
+    }
 }

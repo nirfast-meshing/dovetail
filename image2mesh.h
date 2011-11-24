@@ -43,6 +43,7 @@ private:
     QString lastImageFile;
     bool imageDataLoaded;
     bool _populatedVTKPolyData;
+    bool _successimageloading;
 
     void UpdateImageProperties();
     void UpdateMeshingCriteria();

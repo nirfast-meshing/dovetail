@@ -47,6 +47,7 @@ set ( Dovetail_HDRS
 set ( Dovetail_SRCS
 	main.cpp
 	image2mesh.cpp
+        cgal_header.cpp # just a dummy
 	cgalmeshgenerator.cpp
 	../MyMetaImageIO/MyMetaImageIO/metaimageio.cpp
 	../header/CStopWatch.cpp
