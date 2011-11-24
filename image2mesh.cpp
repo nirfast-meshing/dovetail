@@ -13,7 +13,7 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     ui->pushButton_GenerateMesh->setEnabled(false);
     ui->pushButton_ViewMesh->setEnabled(false);
     // Regional refinement
-    ui->lineEdit_SpecialSize1->setText("0");
+    ui->lineEdit_SpecialSize1->setText("size");
     ui->lineEdit_SpecialID1->setText("0");
 
     // Meshing settings
