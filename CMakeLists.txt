@@ -39,6 +39,7 @@ include_directories (
 set ( Dovetail_HDRS
 	cgal_header.h
 	cgalmeshgenerator.h
+        qimagestackreader.h
 	../MyMetaImageIO/MyMetaImageIO/MyMetaImageIO_global.h
 	../MyMetaImageIO/MyMetaImageIO/metaimageio.h
 	../header/CStopWatch.h
@@ -48,7 +49,8 @@ set ( Dovetail_SRCS
 	main.cpp
 	image2mesh.cpp
         cgal_header.cpp # just a dummy
-	cgalmeshgenerator.cpp
+        cgalmeshgenerator.cpp
+        qimagestackreader.cpp
 	../MyMetaImageIO/MyMetaImageIO/metaimageio.cpp
 	../header/CStopWatch.cpp
 	)
