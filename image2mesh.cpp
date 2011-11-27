@@ -26,8 +26,17 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     ui->textEdit_StatusInfo->setReadOnly(true);
     _populatedVTKPolyData = false;
     imageDataLoaded = false;
+    _picturestacktype = false;
     _tetscale = 1.6;
     _successimageloading = false;
+
+    connect(ui->lineEdit_X, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
+    connect(ui->lineEdit_Y, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
+    connect(ui->lineEdit_Z, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
+//    QDoubleValidator *v = new QDoubleValidator(ui->lineEdit_X);
+//    v->setBottom(0.);
+//    v->setDecimals(14);
+//    ui->lineEdit_X->setValidator(v);
 //    connect(this, SIGNAL(UpdateImageProperties(QString)), ui->lineEdit_SDfilename, SLOT(setText(QString)));
 }
 
@@ -148,6 +157,9 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
     // CGALMeshGenerator
     ui->pushButton_GenerateMesh->setEnabled(false);
 
+    if (_picturestacktype)
+        _loadPictureStack();
+
     if (_successimageloading == false)
     {
         ui->textEdit_StatusInfo->clear();
@@ -215,8 +227,9 @@ void Image2Mesh::on_lineEdit_infilename_returnPressed()
 void Image2Mesh::_loadImage(QString imageFile)
 {
     _successimageloading = false;
+    QString _suffix = QFileInfo(imageFile).suffix();
     if (! imageFile.isEmpty() ) {
-            if (QFileInfo(imageFile).suffix() == "mha")
+            if ( _suffix == "mha")
             {
                 ui->lineEdit_infilename->setText(imageFile);
                 mi.myheader = MetaHeader();
@@ -247,6 +260,7 @@ void Image2Mesh::_loadImage(QString imageFile)
                 if (mi.myheader.elementsize[2] == 1)
                 {
                     ui->textEdit_StatusInfo->setText("Input data contains only 1 slice!\nCan't create mesh!");
+                    ui->textEdit_RegionInfo->clear();
                     UpdateImageProperties();
 
                     QString lineEditStyle("QLineEdit {background: red;}");
@@ -266,6 +280,35 @@ void Image2Mesh::_loadImage(QString imageFile)
                     UpdateMeshingCriteria();
                     ui->pushButton_GenerateMesh->setEnabled(true);
                     _successimageloading = true;
+                }
+            }
+            else if (_suffix == "bmp" || _suffix == "png")
+            {
+                _picturestack.setFileNameRange(imageFile);
+                if (!_picturestack.IsOk())
+                {
+                    std::cerr << " Could read stack of 2D images starting with file: " <<
+                                 imageFile.toStdString() << std::endl;
+                    QMessageBox::information(0,"error",QString(" Could not read file: ") +
+                                             imageFile);
+                    ui->textEdit_StatusInfo->insertPlainText("Could read stack of 2D images starting with file: " +
+                                                             imageFile);
+                    return;
+                }
+                else
+                {
+                    ui->lineEdit_Rows->setText(QString::number(_picturestack.Height()));
+                    ui->lineEdit_Cols->setText(QString::number(_picturestack.Width()));
+                    ui->lineEdit_Slices->setText(QString::number(_picturestack.Slices()));
+
+                    QString lineEditStyle("QLineEdit {background: red;}");
+                    ui->lineEdit_X->setStyleSheet(lineEditStyle);
+                    ui->lineEdit_Y->setStyleSheet(lineEditStyle);
+                    ui->lineEdit_Z->setStyleSheet(lineEditStyle);
+
+                    ui->lineEdit_infilename->setText(_picturestack.Basename());
+
+                    _picturestacktype = true;
                 }
             }
             this->lastImageFile = imageFile;
@@ -388,5 +431,72 @@ int Image2Mesh::PopulateVTKPolyData()
     {
         _populatedVTKPolyData = true;
         return 0;
+    }
+}
+
+void Image2Mesh::_checkpixelsize()
+{
+    double foo;
+    bool _f = false;
+
+    setUpdatesEnabled(false);
+
+    foo = ui->lineEdit_X->text().toDouble();
+    if (foo>0)
+    {
+        _f = true;
+        ui->lineEdit_X->setStyleSheet(styleSheet());
+    }
+    else
+        _f = false;
+
+    foo = ui->lineEdit_Y->text().toDouble();
+    if (foo>0)
+    {
+        _f = _f && true;
+        ui->lineEdit_Y->setStyleSheet(styleSheet());
+    }
+    else
+        _f = false;
+
+    foo = ui->lineEdit_Z->text().toDouble();
+    if (foo>0)
+    {
+        _f = _f && true;
+        ui->lineEdit_Z->setStyleSheet(styleSheet());
+    }
+    else
+        _f = false;
+
+    if (_f)
+        ui->pushButton_GenerateMesh->setEnabled(true);
+
+    setUpdatesEnabled(true);
+
+}
+
+void Image2Mesh::_loadPictureStack()
+{
+    QByteArray *data = _picturestack.readstack();
+    if (!_picturestack.IsOk())
+    {
+        _successimageloading = false;
+        return;
+    }
+    else
+    {
+        mi = MetaImageIO(data);
+        GetImageProperties();
+        mi.myheader.elementsize = mi.myheader.elementspacing;
+        mi.myheader.compresseddata = false;
+        mi.myheader.elementtype = "uchar";
+        mi.myheader.bitdepth = 8;
+        mi.myheader.dimsize[0] = _picturestack.Width();
+        mi.myheader.dimsize[1] = _picturestack.Height();
+        mi.myheader.dimsize[2] = _picturestack.Slices();
+        mi.inrFilename = _picturestack.Basename().toStdString() + ".inr";
+        mi.SetDataSize(mi.myheader.dimsize[0]*mi.myheader.dimsize[1]*mi.myheader.dimsize[2]);
+
+        this->_successimageloading = true;
     }
 }

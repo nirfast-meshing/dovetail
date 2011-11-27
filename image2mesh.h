@@ -5,8 +5,11 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QString>
+#include <QDoubleValidator>
+
 #include "metaimageio.h"
 #include "cgalmeshgenerator.h"
+#include "qimagestackreader.h"
 
 namespace Ui {
     class Image2Mesh;
@@ -34,16 +37,20 @@ private slots:
 
     void on_pushButton_ViewMesh_clicked();
 
+    void _checkpixelsize();
+
 signals:
 
 
 private:
     Ui::Image2Mesh *ui;
 
+    QImageStackReader _picturestack;
     QString lastImageFile;
     bool imageDataLoaded;
     bool _populatedVTKPolyData;
     bool _successimageloading;
+    bool _picturestacktype;
 
     void UpdateImageProperties();
     void UpdateMeshingCriteria();
@@ -52,6 +59,7 @@ private:
     int Run_CGALMeshGenerator();
 
     void _loadImage(QString);
+    void _loadPictureStack();
     int PopulateVTKPolyData();
     int ShowMesh();
     double _tetscale;

@@ -4,7 +4,7 @@ project(Dovetail)
 
 cmake_minimum_required( VERSION 2.6 )
 cmake_policy(SET CMP0017 NEW)
-set ( CMAKE_BUILD_TYPE Release )
+set ( CMAKE_BUILD_TYPE Debug )
 add_definitions ( -Wall -Wno-deprecated)
 
 set(Boost_USE_STATIC_LIBS ON)
