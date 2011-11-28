@@ -24,36 +24,14 @@
 #include "vtkSmartPointer.h"
 #include "vtkGeometryFilter.h"
 #include "vtkTubeFilter.h"
+#include "vtkAxesActor.h"
+#include "vtkOrientationMarkerWidget.h"
+#include "vtkTransform.h"
 
 #include "CGAL/IO/Complex_3_in_triangulation_3_to_vtk.h"
 
 #define VTK_CREATE(type, name) \
   vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
-
-// Vector_3<Kernel> v ( double x, double y, double z);
-// Aff_transformation_3<Kernel> t ( const Translation, Vector_3<Kernel> v);
-// Point_3<Kernel> t.operator() ( Point_3<Kernel> p) const
-//class addoffset : public std::unary_function<Tr::Vertex,void>
-//{
-//    K::Vector_3 offset;
-//public:
-//    explicit addoffset(double x, double y, double z) : offset(K::Vector_3(x,y,z)) {}
-
-//    void operator()(Tr::Vertex& v)
-//    {
-//        v.point()=Weighted_point(v.point().point()+offset, v.point().weight());
-//    }
-//};
-
-//        for (Vertices_iterator itv=c3t3.triangulation().finite_vertices_begin(),
-//             itv_end=c3t3.triangulation().finite_vertices_end();
-//             itv!=itv_end;++itv)
-//        {
-//            itv->point()=
-//                    Weighted_point(itv->point().point()+offset, itv->point().weight());
-//        }
-//    }
-
 
 class CGALMeshGenerator
 {

@@ -72,6 +72,7 @@ void QImageStackReader::_getFileNumberRange()
                 _width = _tmpimg.width();
                 _height = _tmpimg.height();
                 _slices = (_highlimit - _lowlimit + 1);
+                _pixelsize  = 1 / _tmpimg.dotsPerMeterX() * 1000.;
             }
         }
 //        _basename = foo.setFile(fi.dir(),_basename);
@@ -117,14 +118,15 @@ QByteArray* QImageStackReader::readstack()
             return NULL;
         }
         this->read(&_reader);
+        _reader = _reader.convertToFormat(QImage::Format_Indexed8);
 
         QRgb col;
         int64_t gray;
-        for (int ii=0; ii<_width; ++ii)
+        for (int ii=0; ii<_height; ++ii)
         {
-            for (int jj=0; jj<_height; ++jj)
+            for (int jj=0; jj<_width; ++jj)
             {
-                col = _reader.pixel(ii,jj);
+                col = _reader.pixel(jj,ii);
                 gray = qGray(col);
                 uint8_t p = static_cast<uint8_t>(gray);
                 _data->append(reinterpret_cast<char *>(&p),1);
@@ -139,12 +141,10 @@ QByteArray* QImageStackReader::readstack()
         }
     }
 
+    std::cout << "c: " << c << std::endl;
+
     _loadeddata = true;
     return _data;
-    // load images one by one
-    // convert them to grayscale
-    // convert them to uchar
-    // populate _data
 }
 
 QImageStackReader::~QImageStackReader()

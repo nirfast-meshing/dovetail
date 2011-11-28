@@ -234,6 +234,7 @@ void Image2Mesh::_loadImage(QString imageFile)
                 ui->lineEdit_infilename->setText(imageFile);
                 mi.myheader = MetaHeader();
                 mi._filename = imageFile.toStdString();
+                mi.inrFilename = "";
 
                 ui->pushButton_GenerateMesh->setEnabled(false);
                 ui->pushButton_ViewMesh->setEnabled(false);
@@ -279,6 +280,7 @@ void Image2Mesh::_loadImage(QString imageFile)
                     UpdateImageProperties();
                     UpdateMeshingCriteria();
                     ui->pushButton_GenerateMesh->setEnabled(true);
+                    _picturestacktype = false;
                     _successimageloading = true;
                 }
             }
@@ -293,6 +295,7 @@ void Image2Mesh::_loadImage(QString imageFile)
                                              imageFile);
                     ui->textEdit_StatusInfo->insertPlainText("Could read stack of 2D images starting with file: " +
                                                              imageFile);
+                    _successimageloading = false;
                     return;
                 }
                 else
@@ -301,12 +304,26 @@ void Image2Mesh::_loadImage(QString imageFile)
                     ui->lineEdit_Cols->setText(QString::number(_picturestack.Width()));
                     ui->lineEdit_Slices->setText(QString::number(_picturestack.Slices()));
 
+                    ui->lineEdit_infilename->setText(_picturestack.Basename());
+
+                    mesher.outFilename = makeFileName(imageFile.toStdString(),std::string(".mesh"));
+                    ui->lineEdit_outputfilename->setText(QString::fromStdString(mesher.outFilename));
+
+                    _loadPictureStack();
+                    if (!_successimageloading)
+                    {
+                        std::cerr << " Could read stack of 2D images starting with file: " <<
+                                     imageFile.toStdString() << std::endl;
+                        QMessageBox::information(0,"error",QString(" Could not read file: ") +
+                                                 imageFile);
+                        ui->textEdit_StatusInfo->insertPlainText("Could read stack of 2D images starting with file: " +
+                                                                 imageFile);
+                    }
+
                     QString lineEditStyle("QLineEdit {background: red;}");
                     ui->lineEdit_X->setStyleSheet(lineEditStyle);
                     ui->lineEdit_Y->setStyleSheet(lineEditStyle);
                     ui->lineEdit_Z->setStyleSheet(lineEditStyle);
-
-                    ui->lineEdit_infilename->setText(_picturestack.Basename());
 
                     _picturestacktype = true;
                 }
@@ -320,6 +337,7 @@ void Image2Mesh::_loadImage(QString imageFile)
 void Image2Mesh::on_pushButton_ViewMesh_clicked()
 {
 
+    vtkPolyDataMapper::SetResolveCoincidentTopologyToPolygonOffset();
     ui->tabWidget->setCurrentIndex(1);
     VTK_CREATE(vtkGeometryFilter, geomFilter);
     geomFilter->AddInput(_vtkuG);
@@ -359,61 +377,31 @@ void Image2Mesh::on_pushButton_ViewMesh_clicked()
     edgesProp->SetLineWidth(1);
 
     VTK_CREATE(vtkRenderer, ren1);
+
     ren1->SetBackground( 0.1, 0.1, 0.1 );
     ren1->AddActor(elementsActor);
     ren1->AddActor(edgesActor);
 
-    vtkPolyDataMapper::SetResolveCoincidentTopologyToPolygonOffset();
     this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(ren1);
 
-//    QString imageFile("/Users/hamid_r_ghadyani/2.vtk");
+//    VTK_CREATE(vtkRenderWindowInteractor, iren);
+//    iren->SetRenderWindow(ui->qvtkWidget->GetRenderWindow());
 
-//    ui->tabWidget->setCurrentIndex(1);
-//    VTK_CREATE(vtkPolyDataReader, reader);
-//    reader->SetFileName(imageFile.toStdString().c_str());
-//    reader->Update();
-//    VTK_CREATE(vtkPolyDataMapper, meshMapper);
-//    meshMapper->ImmediateModeRenderingOn();
-//    meshMapper->SetInputConnection(reader->GetOutputPort());
+//    vtkRenderWindowInteractor *iren = ui->qvtkWidget->GetRenderWindow()->GetInteractor();
 
-//    VTK_CREATE(vtkExtractEdges, edges);
-//    edges->SetInput(reader->GetOutput());
-//    VTK_CREATE(vtkPolyDataMapper, edge_mapper);
-//    edge_mapper->ImmediateModeRenderingOn();
-//    edge_mapper->SetInput(edges->GetOutput());
+//    VTK_CREATE(vtkAxesActor, axes);
+//    VTK_CREATE(vtkOrientationMarkerWidget, _widget);
+//    _widget->SetOutlineColor( 0.9300, 0.5700, 0.1300 );
+//    _widget->SetOrientationMarker(axes);
+//    _widget->SetInteractor(iren);
+//    _widget->SetViewport( 0.0, 0.0, 0.4, 0.4 );
+//    _widget->SetEnabled(1);
+//    _widget->InteractiveOn();
 
+//    ren1->ResetCamera();
+//    ui->qvtkWidget->GetRenderWindow()->Render();
+//    renderWindow->Render();
 
-
-
-//    VTK_CREATE(vtkActor, meshActor);
-//    VTK_CREATE(vtkActor, edgeActor);
-//    meshActor->SetMapper( meshMapper );
-//    edgeActor->SetMapper( edge_mapper );
-//    edgeActor->GetProperty()->SetColor(0.5,0.2,0.0);
-
-//    VTK_CREATE(vtkRenderer, ren1);
-//    ren1->AddActor( meshActor );
-//    ren1->AddActor( edgeActor );
-//    ren1->SetBackground( 0.1, 0.2, 0.1 );
-//    vtkPolyDataMapper::SetResolveCoincidentTopologyToPolygonOffset();
-//    VTK_CREATE(vtkRenderWindow, renWin);
-//    renWin->AddRenderer( ren1 );
-//    renWin->SetSize( 300, 300 );
-
-//    this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(ren1);
-
-//    if (!_populatedVTKPolyData)
-//    {
-//        int st = PopulateVTKPolyData();
-//        if (st != 0)
-//        {
-
-//        }
-//        else
-//        {
-//            ShowMesh();
-//        }
-//    }
 }
 
 int Image2Mesh::PopulateVTKPolyData()
@@ -421,7 +409,7 @@ int Image2Mesh::PopulateVTKPolyData()
     if (_populatedVTKPolyData)
         _vtkuG->Delete();
     _vtkuG = 0;
-    _vtkuG = CGAL::output_c3t3_to_vtk_unstructured_grid<C3t3>(this->mesher.c3t3);
+    _vtkuG = CGAL::output_c3t3_to_vtk_unstructured_grid<C3t3>(this->mesher.c3t3, _vtkuG);
     if (!_vtkuG)
     {
         _populatedVTKPolyData = false;
@@ -486,7 +474,17 @@ void Image2Mesh::_loadPictureStack()
     else
     {
         mi = MetaImageIO(data);
-        GetImageProperties();
+        double _ps;
+        if (std::fabs(_picturestack.PixelSize() - 0) < 1e-6)
+            _ps = 0.1;
+        else
+            _ps = _picturestack.PixelSize();
+        mi.myheader.elementspacing[0] = _ps;
+        mi.myheader.elementspacing[1] = _ps;
+        mi.myheader.elementspacing[2] = _ps;
+        mi.myheader.offset[0] = 0.;
+        mi.myheader.offset[1] = 0.;
+        mi.myheader.offset[2] = 0.;
         mi.myheader.elementsize = mi.myheader.elementspacing;
         mi.myheader.compresseddata = false;
         mi.myheader.elementtype = "uchar";
@@ -496,7 +494,12 @@ void Image2Mesh::_loadPictureStack()
         mi.myheader.dimsize[2] = _picturestack.Slices();
         mi.inrFilename = _picturestack.Basename().toStdString() + ".inr";
         mi.SetDataSize(mi.myheader.dimsize[0]*mi.myheader.dimsize[1]*mi.myheader.dimsize[2]);
+        mi.myheader.ndims = 3;
+        mi.myheader.byteordermsb = false;
+        mi._GetImageLabels();
 
+        UpdateImageProperties();
+        UpdateMeshingCriteria();
         this->_successimageloading = true;
     }
 }

@@ -18,6 +18,7 @@ public:
     int Width()  const { return _width; }
     int Height() const { return _height; }
     int Slices() const { return _slices; }
+    double PixelSize() const { return _pixelsize; }
 
     QString Basename() const { return _basename; }
     void setFileNameRange(const QString &fileName);
@@ -28,6 +29,8 @@ private:
     QString _ext;
     int _lowlimit, _highlimit;
     int _width, _height, _slices;
+    double _pixelsize;
+
     bool _errorflag;
     bool _loadeddata;
     bool _hasfilenumberrange;
