@@ -6,6 +6,8 @@
 #include <QFileInfo>
 #include <QStringList>
 
+#include "stdint.h"
+
 class QImageStackReader : public QImageReader
 {
 public:
