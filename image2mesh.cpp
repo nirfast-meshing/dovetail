@@ -157,8 +157,8 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
     // CGALMeshGenerator
     ui->pushButton_GenerateMesh->setEnabled(false);
 
-    if (_picturestacktype)
-        _loadPictureStack();
+//    if (_picturestacktype)
+//        _loadPictureStack();
 
     if (_successimageloading == false)
     {
