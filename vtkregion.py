@@ -17,7 +17,8 @@ import random
 # vtkPolyData) which other filters may process.
 #
 reader = vtk.vtkUnstructuredGridReader()
-reader.SetFileName("/Users/hamid_r_ghadyani/fooka.vtk")
+# reader.SetFileName("/Users/hamid_r_ghadyani/fooka.vtk")
+reader.SetFileName("/Volumes/Home/foo/1.vtk")
 #
 
 reader.Update()

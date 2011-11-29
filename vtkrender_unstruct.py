@@ -17,7 +17,8 @@ import random
 # vtkPolyData) which other filters may process.
 #
 reader = vtk.vtkUnstructuredGridReader()
-reader.SetFileName("/Users/hamid_r_ghadyani/fooka.vtk")
+# reader.SetFileName("/Users/hamid_r_ghadyani/fooka.vtk")
+reader.SetFileName("/Volumes/Home/foo/1.vtk")
 
 geomFilter = vtk.vtkGeometryFilter()
 geomFilter.SetInput(reader.GetOutput())
@@ -81,15 +82,15 @@ reader.Update()
 uGrid = reader.GetOutput()
 cellData = uGrid.GetCellData()
 if cellData.SetActiveScalars("mua") == -1:
-	print " No region data in the file."
-	sys.exit()
+    print " No region data in the file."
+    sys.exit()
 
 subdomainArray = cellData.GetScalars()
 for x in subdomainArray.GetRange():
-	if x>smax:
-		smax = x
-	if x<smin:
-		xmin = x
+    if x>smax:
+        smax = x
+    if x<smin:
+        xmin = x
 nsubdomains = smax - smin
 colorstep = 0.9/nsubdomains
 color = 0.05
@@ -103,27 +104,27 @@ smin = int(smin)
 smax = int(smax)
 c=0
 for i in range(smin,smax+1):
-	subs[c] = vtk.vtkThreshold()
-	subs[c].SetArrayName("region")
-	subs[c].SetAttributeModeToUseCellData()
-	subs[c].SetInput(uGrid)
-	subs[c].ThresholdBetween(i-0.5,i+0.5)
+    subs[c] = vtk.vtkThreshold()
+    subs[c].SetArrayName("mua")
+    subs[c].SetAttributeModeToUseCellData()
+    subs[c].SetInput(uGrid)
+    subs[c].ThresholdBetween(i-0.5,i+0.5)
 
-	geoFilters[c] = vtk.GeometryFilter()
-	geoFilters[c].SetInput(subs[c].GetOutput())
-	
-	subMappers[c] = vtk.PolyDataMapper()
-	subMappers[c].SetInput(geoFilters.GetOutput())
-	subMappers[c].ScalarVisibilityOff()
-	
-	subActors[c] = vtk.vtkActors()
-	subActors[c].SetMapper(subMappers[c])
-	subActors[c].SetColor(color, random.random(), random.random())
-	
-	ren2.AddActor(subActors[c])
-	
-	color = color + colorstep
-	c = c + 1
+    geoFilters[c] = vtk.GeometryFilter()
+    geoFilters[c].SetInput(subs[c].GetOutput())
+    
+    subMappers[c] = vtk.PolyDataMapper()
+    subMappers[c].SetInput(geoFilters.GetOutput())
+    subMappers[c].ScalarVisibilityOff()
+    
+    subActors[c] = vtk.vtkActors()
+    subActors[c].SetMapper(subMappers[c])
+    subActors[c].SetColor(color, random.random(), random.random())
+    
+    ren2.AddActor(subActors[c])
+    
+    color = color + colorstep
+    c = c + 1
 
 renWin2 = vtk.vtkRenderWindow()
 renWin2.AddRenderer(ren2)

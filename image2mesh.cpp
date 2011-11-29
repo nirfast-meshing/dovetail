@@ -35,10 +35,6 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     connect(ui->lineEdit_Y, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
     connect(ui->lineEdit_Z, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
 
-//    QDoubleValidator *v = new QDoubleValidator(ui->lineEdit_X);
-//    v->setBottom(0.);
-//    v->setDecimals(14);
-//    ui->lineEdit_X->setValidator(v);
 //    connect(this, SIGNAL(UpdateImageProperties(QString)), ui->lineEdit_SDfilename, SLOT(setText(QString)));
 }
 
