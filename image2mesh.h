@@ -49,6 +49,7 @@ private:
     QString lastImageFile;
     bool imageDataLoaded;
     bool _populatedVTKPolyData;
+    bool _vtkaxescreated;
     bool _successimageloading;
     bool _picturestacktype;
 
@@ -64,6 +65,9 @@ private:
     int ShowMesh();
     double _tetscale;
     vtkUnstructuredGrid* _vtkuG;
+//    vtkOrientationMarkerWidget *_vtkAxesWidget;
+    vtkSmartPointer<vtkOrientationMarkerWidget> _vtkAxesWidget;
+    vtkSmartPointer<vtkAxesActor> _vtkAxes;
 };
 
 #endif // IMAGE2MESH_H

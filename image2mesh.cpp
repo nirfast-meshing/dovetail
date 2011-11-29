@@ -25,6 +25,7 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
 
     ui->textEdit_StatusInfo->setReadOnly(true);
     _populatedVTKPolyData = false;
+    _vtkaxescreated = false;
     imageDataLoaded = false;
     _picturestacktype = false;
     _tetscale = 1.6;
@@ -33,6 +34,7 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     connect(ui->lineEdit_X, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
     connect(ui->lineEdit_Y, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
     connect(ui->lineEdit_Z, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
+
 //    QDoubleValidator *v = new QDoubleValidator(ui->lineEdit_X);
 //    v->setBottom(0.);
 //    v->setDecimals(14);
@@ -358,10 +360,6 @@ void Image2Mesh::on_pushButton_ViewMesh_clicked()
     VTK_CREATE(vtkExtractEdges, edgesFilter);
     edgesFilter->SetInput(geomFilter->GetOutput());
 
-//    VTK_CREATE(vtkTubeFilter, tubeFilter);
-//    tubeFilter->SetInput(edgesFilter->GetOutput());
-//    tubeFilter->SetRadius(0.1);
-
     VTK_CREATE(vtkPolyDataMapper, edgesMapper);
     edgesMapper->SetInput(edgesFilter->GetOutput());
     edgesMapper->ScalarVisibilityOff();
@@ -384,23 +382,27 @@ void Image2Mesh::on_pushButton_ViewMesh_clicked()
 
     this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(ren1);
 
-//    VTK_CREATE(vtkRenderWindowInteractor, iren);
-//    iren->SetRenderWindow(ui->qvtkWidget->GetRenderWindow());
+    if (_vtkaxescreated)
+    {
+        _vtkAxesWidget->SetEnabled(0);
+    }
 
-//    vtkRenderWindowInteractor *iren = ui->qvtkWidget->GetRenderWindow()->GetInteractor();
+//    _vtkAxesWidget = vtkOrientationMarkerWidget::New(); _vtkaxescreated = true;
+    _vtkAxesWidget = vtkSmartPointer<vtkOrientationMarkerWidget>::New();_vtkaxescreated = true;
+    vtkRenderWindowInteractor *iren = ren1->GetRenderWindow()->GetInteractor();
+    _vtkAxesWidget->SetDefaultRenderer(ren1);
+    _vtkAxesWidget->SetInteractor(iren);
 
-//    VTK_CREATE(vtkAxesActor, axes);
-//    VTK_CREATE(vtkOrientationMarkerWidget, _widget);
-//    _widget->SetOutlineColor( 0.9300, 0.5700, 0.1300 );
-//    _widget->SetOrientationMarker(axes);
-//    _widget->SetInteractor(iren);
-//    _widget->SetViewport( 0.0, 0.0, 0.4, 0.4 );
-//    _widget->SetEnabled(1);
-//    _widget->InteractiveOn();
+//    VTK_CREATE(vtkAxesActor, _vtkAxes);
+    _vtkAxes = vtkSmartPointer<vtkAxesActor>::New();
+    _vtkAxesWidget->SetOrientationMarker(_vtkAxes);
 
-//    ren1->ResetCamera();
-//    ui->qvtkWidget->GetRenderWindow()->Render();
-//    renderWindow->Render();
+    _vtkAxesWidget->SetOutlineColor( 0.9300, 0.5700, 0.1300 );
+    _vtkAxesWidget->SetViewport( 0.0, 0.0, 0.34, 0.34 );
+    _vtkAxesWidget->SetEnabled(1);
+    _vtkAxesWidget->InteractiveOn();
+
+    ren1->ResetCamera();
 
 }
 
