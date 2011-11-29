@@ -4,7 +4,8 @@ project(Dovetail)
 
 cmake_minimum_required( VERSION 2.6 )
 cmake_policy(SET CMP0017 NEW)
-set ( CMAKE_BUILD_TYPE Release )
+#set ( CMAKE_BUILD_TYPE Debug )
+
 add_definitions ( -Wall -Wno-deprecated)
 
 set(Boost_USE_STATIC_LIBS ON)
@@ -39,6 +40,7 @@ include_directories (
 set ( Dovetail_HDRS
 	cgal_header.h
 	cgalmeshgenerator.h
+        qimagestackreader.h
 	../MyMetaImageIO/MyMetaImageIO/MyMetaImageIO_global.h
 	../MyMetaImageIO/MyMetaImageIO/metaimageio.h
 	../header/CStopWatch.h
@@ -48,7 +50,8 @@ set ( Dovetail_SRCS
 	main.cpp
 	image2mesh.cpp
         cgal_header.cpp # just a dummy
-	cgalmeshgenerator.cpp
+        cgalmeshgenerator.cpp
+        qimagestackreader.cpp
 	../MyMetaImageIO/MyMetaImageIO/metaimageio.cpp
 	../header/CStopWatch.cpp
 	)

@@ -16,9 +16,9 @@ import vtk
 # vtkPolyData) which other filters may process.
 #
 # reader = vtk.vtkUnstructuredGridReader()
-reader = vtk.vtkPolyDataReader();
+reader = vtk.vtkPolyDataReader()
 reader.SetFileName("/Volumes/Home/foo/tmp/1.vtk")
-reader.Update();
+reader.Update()
 # 
 # In this example we terminate the pipeline with a mapper process object.
 # (Intermediate filters such as vtkShrinkPolyData could be inserted in
@@ -55,7 +55,7 @@ coneActor.SetMapper(moldMapper)
 ren1 = vtk.vtkRenderer()
 ren1.AddActor(coneActor)
 ren1.AddActor(edgeActor)
-ren1.SetBackground(0.1, 0.8, 0.1)
+ren1.SetBackground(0.2,0.3,0.4)
 
 vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
 #
@@ -85,12 +85,16 @@ iren.SetRenderWindow(renWin)
 style = vtk.vtkInteractorStyleTrackballCamera()
 iren.SetInteractorStyle(style)
 
-#
-# Unlike the previous scripts where we performed some operations and then
-# exited, here we leave an event loop running. The user can use the mouse
-# and keyboard to perform the operations on the scene according to the
-# current interaction style.
-#
+axes = vtk.vtkAxesActor()
+widget = vtk.vtkOrientationMarkerWidget()
+widget.SetOutlineColor( 0.9300, 0.5700, 0.1300 )
+widget.SetOrientationMarker( axes )
+widget.SetInteractor( iren )
+widget.SetViewport( 0.0, 0.0, 0.4, 0.4 )
+widget.SetEnabled( 1 )
+widget.InteractiveOn()
+
+ren1.ResetCamera()
 
 #
 # Initialize and start the event loop. Once the render window appears, mouse
@@ -102,4 +106,4 @@ iren.SetInteractorStyle(style)
 iren.Initialize()
 iren.Start()
 
-http://stackoverflow.com/questions/7548966/how-to-display-only-triangle-boundaries-on-textured-surface-in-vtk
+# http://stackoverflow.com/questions/7548966/how-to-display-only-triangle-boundaries-on-textured-surface-in-vtk
