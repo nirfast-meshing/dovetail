@@ -26,9 +26,14 @@ class SimpleView(QtGui.QMainWindow):
 		renwin = widget.GetRenderWindow()
 		renwin.AddRenderer(ren)
 		
-		cone = vtk.vtkConeSource()
+		cone = vtk.vtkSphereSource()
+		sphere = vtk.vtkSphereSource()
+		gfilter = vtk.vtkGeometryFilter()
+		gfilter.AddInputConnection(cone.GetOutputPort())
+		gfilter.AddInputConnection(1,sphere.GetOutputPort())
+		
 		mapper = vtk.vtkPolyDataMapper()
-		mapper.SetInputConnection(cone.GetOutputPort())
+		mapper.SetInputConnection(gfilter.GetOutputPort())
 		actor = vtk.vtkActor()
 		actor.SetMapper(mapper)
 		

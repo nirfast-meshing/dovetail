@@ -16,8 +16,10 @@ import vtk
 # vtkPolyData) which other filters may process.
 #
 reader = vtk.vtkUnstructuredGridReader()
+
 # reader = vtk.vtkPolyDataReader();
-reader.SetFileName("/Users/hamid/double.vtk")
+# reader.SetFileName("/Users/hamid/double.vtk")
+reader.SetFileName("/Volumes/Home/foo/2.vtk")
 reader.Update();
 # 
 # In this example we terminate the pipeline with a mapper process object.
@@ -64,7 +66,7 @@ vtk.vtkPolyDataMapper().SetResolveCoincidentTopologyToPolygonOffset()
 #
 plane = vtk.vtkPlane()
 plane.SetOrigin(reader.GetOutput().GetCenter())
-plane.SetNormal(0,0,1);
+plane.SetNormal(1,0,1);
 
 planeCut = vtk.vtkCutter()
 planeCut.SetInputConnection(reader.GetOutputPort())
@@ -77,7 +79,9 @@ cutMapper.SetScalarRange(reader.GetOutput().GetScalarRange())
 cutActor = vtk.vtkActor()
 cutActor.SetMapper(cutMapper)
 
-ren1.AddActor(cutActor)
+x = vtk.vtkActor
+
+# ren1.AddActor(cutActor)
 
 #
 # Clipping Stuff
@@ -87,6 +91,9 @@ clip = vtk.vtkClipDataSet()
 clip.SetInputConnection(reader.GetOutputPort())
 clip.SetClipFunction(plane)
 clip.InsideOutOn()
+
+clip.Update()
+print "clip cells: %d" % clip.GetOutput().GetNumberOfCells()
 
 # clipMapper = vtk.vtkPolyDataMapper()
 clipMapper = vtk.vtkDataSetMapper()
@@ -98,20 +105,45 @@ clipActor.SetMapper(clipMapper)
 
 prop = clipActor.GetProperty()
 prop.SetColor(0.9,0.8,0.6)
-prop.SetDiffuse(0)
+# prop.SetDiffuse(0)
 # prop.SetAmbient(1)
-prop.SetInterpolation(1)
+# prop.SetInterpolation(1)
 
-ren1.AddActor(clipActor)
+# ren1.AddActor(clipActor)
+
+#
+# Extract Geometry
+#
+
+eg = vtk.vtkExtractGeometry()
+eg.ExtractInsideOn()
+eg.ExtractBoundaryCellsOn()
+# eg.ExtractOnlyBoundaryCellsOn()
+eg.SetImplicitFunction(plane)
+eg.SetInputConnection(reader.GetOutputPort())
+egug = eg.GetOutput()
+eg.Update()
+
+print eg.GetClassName(), egug.GetClassName()
+print "ExtracGeometry cells: %d" % egug.GetNumberOfCells()
+
+egmapper = vtk.vtkDataSetMapper()
+egmapper.SetInput(egug)
+egmapper.SetScalarRange(reader.GetOutput().GetScalarRange())
+
+egActor = vtk.vtkActor()
+egActor.SetMapper(egmapper)
+
+ren1.AddActor(egActor)
 
 edges2 = vtk.vtkExtractEdges()
-edges2.SetInputConnection(clip.GetOutputPort())
+edges2.SetInputConnection(eg.GetOutputPort())
 edge_mapper2 = vtk.vtkPolyDataMapper()
 edge_mapper2.SetInput(edges2.GetOutput())
 
 edges2Actor = vtk.vtkActor()
 edges2Actor.SetMapper(edge_mapper2)
-edges2Actor.GetProperty().SetColor(0.8,0.8,0.8)
+edges2Actor.GetProperty().SetColor(1,1,0)
 ren1.AddActor(edges2Actor)
 #
 # Finally we create the render window which will show up on the screen
