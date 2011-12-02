@@ -31,6 +31,7 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     _tetscale = 1.6;
     _successimageloading = false;
 
+
     connect(ui->lineEdit_X, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
     connect(ui->lineEdit_Y, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
     connect(ui->lineEdit_Z, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
@@ -41,8 +42,8 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
 Image2Mesh::~Image2Mesh()
 {
     delete ui;
-    if (_vtkuG)
-        _vtkuG->Delete();
+//    if (_vtkuG)
+//        _vtkuG->Delete();
 }
 
 void Image2Mesh::on_pushButton_BrowseImage_clicked()
@@ -404,10 +405,11 @@ void Image2Mesh::on_pushButton_ViewMesh_clicked()
 
 int Image2Mesh::PopulateVTKPolyData()
 {
-    if (_populatedVTKPolyData)
-        _vtkuG->Delete();
-    _vtkuG = 0;
-    _vtkuG = CGAL::output_c3t3_to_vtk_unstructured_grid<C3t3>(this->mesher.c3t3, _vtkuG);
+//    if (_populatedVTKPolyData)
+//        _vtkuG->Delete();
+//    _vtkuG = 0;
+    _vtkuG = vtkSmartPointer<vtkUnstructuredGrid>::New();
+    CGAL::output_c3t3_to_vtk_unstructured_grid<C3t3>(this->mesher.c3t3, _vtkuG);
     if (!_vtkuG)
     {
         _populatedVTKPolyData = false;
@@ -500,4 +502,19 @@ void Image2Mesh::_loadPictureStack()
         UpdateMeshingCriteria();
         this->_successimageloading = true;
     }
+}
+
+void Image2Mesh::on_checkBoxClip_stateChanged(int arg1)
+{
+
+}
+
+void Image2Mesh::on_verticalSliderClip_valueChanged(int value)
+{
+
+}
+
+void Image2Mesh::on_checkBoxColor_stateChanged(int arg1)
+{
+
 }

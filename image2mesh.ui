@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>835</width>
-    <height>554</height>
+    <width>854</width>
+    <height>563</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,7 +27,7 @@
     <rect>
      <x>2</x>
      <y>2</y>
-     <width>823</width>
+     <width>833</width>
      <height>543</height>
     </rect>
    </property>
@@ -35,7 +35,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_Mesher">
        <attribute name="title">
@@ -1189,18 +1189,152 @@ p, li { white-space: pre-wrap; }
        <attribute name="title">
         <string>Viewer</string>
        </attribute>
-       <widget class="QWidget" name="gridLayoutWidget">
+       <widget class="QWidget" name="horizontalLayoutWidget_2">
         <property name="geometry">
          <rect>
-          <x>4</x>
-          <y>8</y>
-          <width>789</width>
-          <height>479</height>
+          <x>2</x>
+          <y>4</y>
+          <width>743</width>
+          <height>509</height>
          </rect>
         </property>
-        <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
-          <widget class="QVTKWidget" name="qvtkWidget" native="true"/>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QVTKWidget" name="qvtkWidget"/>
+         </item>
+         <item>
+          <widget class="QSlider" name="verticalSliderClip">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="value">
+            <number>50</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="tickPosition">
+            <enum>QSlider::TicksAbove</enum>
+           </property>
+           <property name="tickInterval">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="verticalLayoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>742</x>
+          <y>4</y>
+          <width>87</width>
+          <height>151</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QCheckBox" name="checkBoxColor">
+           <property name="text">
+            <string>Paint</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxClip">
+           <property name="text">
+            <string>Clip</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxBadQuality">
+           <property name="text">
+            <string>Quality</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_QualityChart">
+       <attribute name="title">
+        <string>Quality Histogram</string>
+       </attribute>
+       <widget class="QGroupBox" name="groupBox_6">
+        <property name="geometry">
+         <rect>
+          <x>714</x>
+          <y>64</y>
+          <width>111</width>
+          <height>179</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Stats</string>
+        </property>
+        <widget class="QPlainTextEdit" name="plainTextStats">
+         <property name="geometry">
+          <rect>
+           <x>2</x>
+           <y>34</y>
+           <width>105</width>
+           <height>137</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QVTKWidget" name="qvtkChart">
+        <property name="geometry">
+         <rect>
+          <x>5</x>
+          <y>9</y>
+          <width>705</width>
+          <height>503</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QWidget" name="">
+        <property name="geometry">
+         <rect>
+          <x>710</x>
+          <y>18</y>
+          <width>129</width>
+          <height>39</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QRadioButton" name="radioButtonCollapse">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Collapse Quality</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonVolume">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Volume</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

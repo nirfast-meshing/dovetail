@@ -39,6 +39,12 @@ private slots:
 
     void _checkpixelsize();
 
+    void on_checkBoxClip_stateChanged(int arg1);
+
+    void on_verticalSliderClip_valueChanged(int value);
+
+    void on_checkBoxColor_stateChanged(int arg1);
+
 signals:
 
 
@@ -64,7 +70,8 @@ private:
     int PopulateVTKPolyData();
     int ShowMesh();
     double _tetscale;
-    vtkUnstructuredGrid* _vtkuG;
+//    vtkUnstructuredGrid* _vtkuG;
+    vtkSmartPointer<vtkUnstructuredGrid> _vtkuG;
 //    vtkOrientationMarkerWidget *_vtkAxesWidget;
     vtkSmartPointer<vtkOrientationMarkerWidget> _vtkAxesWidget;
     vtkSmartPointer<vtkAxesActor> _vtkAxes;
