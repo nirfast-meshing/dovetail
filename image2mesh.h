@@ -69,12 +69,27 @@ private:
     void _loadPictureStack();
     int PopulateVTKPolyData();
     int ShowMesh();
+    int _initializeVTK();
+    void do_clip();
+    void update_mesh();
     double _tetscale;
 //    vtkUnstructuredGrid* _vtkuG;
+    double *_bbx;
+    double *_center;
     vtkSmartPointer<vtkUnstructuredGrid> _vtkuG;
-//    vtkOrientationMarkerWidget *_vtkAxesWidget;
     vtkSmartPointer<vtkOrientationMarkerWidget> _vtkAxesWidget;
     vtkSmartPointer<vtkAxesActor> _vtkAxes;
+    vtkSmartPointer<vtkGeometryFilter> _gfilter;
+    vtkSmartPointer<vtkPolyDataMapper> _visible_mapper;
+    vtkSmartPointer<vtkExtractEdges> _edges;
+    vtkSmartPointer<vtkPolyDataMapper> _edge_mapper;
+    vtkSmartPointer<vtkActor> _visibleedgeActor;
+    vtkSmartPointer<vtkActor> _visibleactor;
+    vtkSmartPointer<vtkRenderer> _ren;
+    vtkSmartPointer<vtkAlgorithmOutput> _visibleport;
+    vtkSmartPointer<vtkPlane> _cutplane;
+    vtkSmartPointer<vtkExtractGeometry> _eg;
+    vtkSmartPointer<vtkGeometryFilter> _gf2;
 };
 
 #endif // IMAGE2MESH_H

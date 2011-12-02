@@ -27,11 +27,16 @@
 #include "vtkAxesActor.h"
 #include "vtkOrientationMarkerWidget.h"
 #include "vtkTransform.h"
-
+#include "vtkAlgorithmOutput.h"
+#include "vtkExtractGeometry.h"
+#include "vtkUnstructuredGridSource.h"
+#include "vtkPlane.h"
 #include "CGAL/IO/Complex_3_in_triangulation_3_to_vtk.h"
 
 #define VTK_CREATE(type, name) \
   vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+#define VTK_NEW(type, name) \
+    name = vtkSmartPointer<type>::New()
 
 class CGALMeshGenerator
 {

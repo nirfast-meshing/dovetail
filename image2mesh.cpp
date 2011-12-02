@@ -15,6 +15,9 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     // Regional refinement
     ui->lineEdit_SpecialSize1->setText("size");
     ui->lineEdit_SpecialID1->setText("0");
+    ui->tabWidget->setCurrentIndex(0);
+    ui->verticalSliderClip->setEnabled(false);
+    ui->checkBoxColor->setEnabled(false);
 
     // Meshing settings
     ui->lineEdit_TetSize->setText("3.0");
@@ -31,6 +34,8 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     _tetscale = 1.6;
     _successimageloading = false;
 
+    _bbx = new double[6];
+    _center = new double[3];
 
     connect(ui->lineEdit_X, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
     connect(ui->lineEdit_Y, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
@@ -41,6 +46,16 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
 
 Image2Mesh::~Image2Mesh()
 {
+    try
+    {
+//        delete _bbx;
+//        delete _center;
+    }
+    catch(std::exception &e)
+    {
+        std::cout << "Standard Exception: " << e.what() << std::endl;
+    }
+
     delete ui;
 //    if (_vtkuG)
 //        _vtkuG->Delete();
@@ -333,64 +348,138 @@ void Image2Mesh::_loadImage(QString imageFile)
             ui->lineEdit_infilename->clear();
 }
 
-void Image2Mesh::on_pushButton_ViewMesh_clicked()
+int Image2Mesh::_initializeVTK()
 {
-
     vtkPolyDataMapper::SetResolveCoincidentTopologyToPolygonOffset();
-    ui->tabWidget->setCurrentIndex(1);
-    VTK_CREATE(vtkGeometryFilter, geomFilter);
-    geomFilter->AddInput(_vtkuG);
+    VTK_NEW(vtkGeometryFilter, this->_gfilter);
+    _gfilter->AddInput(_vtkuG);
+    VTK_NEW(vtkPolyDataMapper, _visible_mapper);
+    _visible_mapper->SetScalarModeToUseCellData();
+    VTK_NEW(vtkExtractEdges, _edges);
+    VTK_NEW(vtkPolyDataMapper, _edge_mapper);
+    _edge_mapper->SetScalarModeToUseCellData();
+    VTK_NEW(vtkActor, _visibleedgeActor);
+    VTK_NEW(vtkActor, _visibleactor);
+    VTK_NEW(vtkRenderer, _ren);
+    _visibleport = _gfilter->GetOutputPort();
+    _ren->ResetCamera();
+    _bbx = _vtkuG->GetBounds();
+    _center = _vtkuG->GetCenter();
+    VTK_NEW(vtkPlane, _cutplane);
+    _cutplane->SetOrigin(_center);
+    _cutplane->SetNormal(0.,0.,1.);
 
-    VTK_CREATE(vtkPolyDataMapper, elementsMapper);
-    elementsMapper->SetInput(geomFilter->GetOutput());
+    VTK_NEW(vtkExtractGeometry, _eg);
+    _eg->ExtractInsideOn();
+    _eg->ExtractBoundaryCellsOn();
+    _eg->SetInput(_vtkuG);
+    _eg->SetImplicitFunction(_cutplane);
 
-    VTK_CREATE(vtkActor, elementsActor);
-    elementsActor->SetMapper(elementsMapper);
+    VTK_NEW(vtkGeometryFilter, _gf2);
+    _gf2->AddInputConnection(_eg->GetOutputPort());
 
-    VTK_CREATE(vtkProperty, elementsProp);
-    elementsProp = elementsActor->GetProperty();
-    elementsProp->SetColor(0.1,0.27,0.75);
-    elementsProp->SetDiffuse(0);
-    elementsProp->SetAmbient(1);
-    elementsProp->SetInterpolationToFlat();
-
-    VTK_CREATE(vtkExtractEdges, edgesFilter);
-    edgesFilter->SetInput(geomFilter->GetOutput());
-
-    VTK_CREATE(vtkPolyDataMapper, edgesMapper);
-    edgesMapper->SetInput(edgesFilter->GetOutput());
-    edgesMapper->ScalarVisibilityOff();
-
-    VTK_CREATE(vtkActor,edgesActor);
-    edgesActor->SetMapper(edgesMapper);
-
+    _edge_mapper->SetInputConnection(_edges->GetOutputPort());
+    _visibleedgeActor->SetMapper(_edge_mapper);
     VTK_CREATE(vtkProperty, edgesProp);
-    edgesProp = edgesActor->GetProperty();
+    edgesProp = _visibleedgeActor->GetProperty();
     edgesProp->SetColor(0.75,0.75,0.75);
     edgesProp->SetDiffuse(0);
     edgesProp->SetAmbient(1);
     edgesProp->SetLineWidth(1);
 
-    VTK_CREATE(vtkRenderer, ren1);
+    _visibleactor->SetMapper(_visible_mapper);
+    VTK_CREATE(vtkProperty, elementsProp);
+    elementsProp = _visibleactor->GetProperty();
+    elementsProp->SetColor(0.1,0.27,0.75);
+    elementsProp->SetDiffuse(0);
+    elementsProp->SetAmbient(1);
+    elementsProp->SetInterpolationToFlat();
 
-    ren1->SetBackground( 0.1, 0.1, 0.1 );
-    ren1->AddActor(elementsActor);
-    ren1->AddActor(edgesActor);
 
-    this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(ren1);
+    _ren->SetBackground( 0.1, 0.1, 0.1 );
+    this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(_ren);
+    _ren->AddViewProp(_visibleactor);
+    _ren->AddViewProp(_visibleedgeActor);
+
+    return 0;
+}
+
+void Image2Mesh::on_pushButton_ViewMesh_clicked()
+{
+//    _initializeVTK();
+
+    ShowMesh();
+
+
+
+//    ui->tabWidget->setCurrentIndex(1);
+//    VTK_CREATE(vtkGeometryFilter, geomFilter);
+//    geomFilter->AddInput(_vtkuG);
+
+//    VTK_CREATE(vtkPolyDataMapper, elementsMapper);
+//    elementsMapper->SetInput(geomFilter->GetOutput());
+
+//    VTK_CREATE(vtkActor, elementsActor);
+//    elementsActor->SetMapper(elementsMapper);
+
+//    VTK_CREATE(vtkProperty, elementsProp);
+//    elementsProp = elementsActor->GetProperty();
+//    elementsProp->SetColor(0.1,0.27,0.75);
+//    elementsProp->SetDiffuse(0);
+//    elementsProp->SetAmbient(1);
+//    elementsProp->SetInterpolationToFlat();
+
+//    VTK_CREATE(vtkExtractEdges, edgesFilter);
+//    edgesFilter->SetInput(geomFilter->GetOutput());
+
+//    VTK_CREATE(vtkPolyDataMapper, edgesMapper);
+//    edgesMapper->SetInput(edgesFilter->GetOutput());
+//    edgesMapper->ScalarVisibilityOff();
+
+//    VTK_CREATE(vtkActor,edgesActor);
+//    edgesActor->SetMapper(edgesMapper);
+
+//    VTK_CREATE(vtkProperty, edgesProp);
+//    edgesProp = edgesActor->GetProperty();
+//    edgesProp->SetColor(0.75,0.75,0.75);
+//    edgesProp->SetDiffuse(0);
+//    edgesProp->SetAmbient(1);
+//    edgesProp->SetLineWidth(1);
+
+//    VTK_CREATE(vtkRenderer, ren1);
+
+//    ren1->SetBackground( 0.1, 0.1, 0.1 );
+//    ren1->AddActor(elementsActor);
+//    ren1->AddActor(edgesActor);
+
+//    this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(ren1);
+}
+
+void Image2Mesh::update_mesh()
+{
+    ui->tabWidget->setCurrentIndex(1);
+    _visible_mapper->SetInputConnection(_visibleport);
+    _edges->SetInputConnection(_visibleport);
+    _visible_mapper->Update();
+    ui->qvtkWidget->GetRenderWindow()->Render();
+}
+
+int Image2Mesh::ShowMesh()
+{
+
+    update_mesh();
 
     if (_vtkaxescreated)
     {
         _vtkAxesWidget->SetEnabled(0);
     }
 
-//    _vtkAxesWidget = vtkOrientationMarkerWidget::New(); _vtkaxescreated = true;
-    _vtkAxesWidget = vtkSmartPointer<vtkOrientationMarkerWidget>::New();_vtkaxescreated = true;
-    vtkRenderWindowInteractor *iren = ren1->GetRenderWindow()->GetInteractor();
-    _vtkAxesWidget->SetDefaultRenderer(ren1);
+    VTK_NEW(vtkOrientationMarkerWidget, _vtkAxesWidget);
+    _vtkaxescreated = true;
+    vtkRenderWindowInteractor *iren = _ren->GetRenderWindow()->GetInteractor();
+    _vtkAxesWidget->SetDefaultRenderer(_ren);
     _vtkAxesWidget->SetInteractor(iren);
 
-//    VTK_CREATE(vtkAxesActor, _vtkAxes);
     _vtkAxes = vtkSmartPointer<vtkAxesActor>::New();
     _vtkAxesWidget->SetOrientationMarker(_vtkAxes);
 
@@ -399,8 +488,8 @@ void Image2Mesh::on_pushButton_ViewMesh_clicked()
     _vtkAxesWidget->SetEnabled(1);
     _vtkAxesWidget->InteractiveOn();
 
-    ren1->ResetCamera();
-
+    return 0;
+//    ren1->ResetCamera();
 }
 
 int Image2Mesh::PopulateVTKPolyData()
@@ -418,6 +507,7 @@ int Image2Mesh::PopulateVTKPolyData()
     else
     {
         _populatedVTKPolyData = true;
+        _initializeVTK();
         return 0;
     }
 }
@@ -506,15 +596,45 @@ void Image2Mesh::_loadPictureStack()
 
 void Image2Mesh::on_checkBoxClip_stateChanged(int arg1)
 {
+    std::cerr << " checnaged ........ " << arg1 << '\n';
+    if (arg1 == 0)
+    {
+        ui->verticalSliderClip->setEnabled(false);
+        _visibleport = _gfilter->GetOutputPort();
+        ShowMesh();
+    }
+    else if (arg1 == 2)
+    {
+        ui->verticalSliderClip->setEnabled(true);
+        do_clip();
+    }
 
+
+}
+
+void Image2Mesh::do_clip()
+{
+    _visibleport = _gf2->GetOutputPort();
+    update_mesh();
 }
 
 void Image2Mesh::on_verticalSliderClip_valueChanged(int value)
 {
-
+    double origin[3] = {_center[0], _center[1], _center[2]};
+    origin[2] = static_cast<double>(value)/100*(_bbx[5]-_bbx[4])+_bbx[4];
+    _cutplane->SetOrigin(origin);
+    do_clip();
 }
 
 void Image2Mesh::on_checkBoxColor_stateChanged(int arg1)
 {
-
+    if (arg1 == 0)
+    {
+        _edge_mapper->SetScalarModeToUseCellData();
+    }
+    else if (arg1 == 2)
+    {
+        _edge_mapper->SetScalarModeToUseCellData();
+    }
+    update_mesh();
 }
