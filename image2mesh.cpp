@@ -17,7 +17,7 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     ui->lineEdit_SpecialID1->setText("0");
     ui->tabWidget->setCurrentIndex(0);
     ui->verticalSliderClip->setEnabled(false);
-    ui->checkBoxColor->setEnabled(false);
+    ui->checkBoxColor->setEnabled(true);
 
     // Meshing settings
     ui->lineEdit_TetSize->setText("3.0");
@@ -41,7 +41,11 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     connect(ui->lineEdit_Y, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
     connect(ui->lineEdit_Z, SIGNAL(textChanged(QString)), this, SLOT(_checkpixelsize()));
 
-//    connect(this, SIGNAL(UpdateImageProperties(QString)), ui->lineEdit_SDfilename, SLOT(setText(QString)));
+    ui->checkBoxBadQuality->setEnabled(0);
+    ui->lineEditQualThreshold->setEnabled(0);
+    ui->radioButtonVolume->toggle();
+    _1sttime_chart = true;
+    scalefactor.resize(2,0);
 }
 
 Image2Mesh::~Image2Mesh()
@@ -348,126 +352,15 @@ void Image2Mesh::_loadImage(QString imageFile)
             ui->lineEdit_infilename->clear();
 }
 
-int Image2Mesh::_initializeVTK()
-{
-    vtkPolyDataMapper::SetResolveCoincidentTopologyToPolygonOffset();
-    VTK_NEW(vtkGeometryFilter, this->_gfilter);
-    _gfilter->AddInput(_vtkuG);
-    VTK_NEW(vtkPolyDataMapper, _visible_mapper);
-    _visible_mapper->SetScalarModeToUseCellData();
-    VTK_NEW(vtkExtractEdges, _edges);
-    VTK_NEW(vtkPolyDataMapper, _edge_mapper);
-    _edge_mapper->SetScalarModeToUseCellData();
-    VTK_NEW(vtkActor, _visibleedgeActor);
-    VTK_NEW(vtkActor, _visibleactor);
-    VTK_NEW(vtkRenderer, _ren);
-    _visibleport = _gfilter->GetOutputPort();
-    _ren->ResetCamera();
-    _bbx = _vtkuG->GetBounds();
-    _center = _vtkuG->GetCenter();
-    VTK_NEW(vtkPlane, _cutplane);
-    _cutplane->SetOrigin(_center);
-    _cutplane->SetNormal(0.,0.,1.);
-
-    VTK_NEW(vtkExtractGeometry, _eg);
-    _eg->ExtractInsideOn();
-    _eg->ExtractBoundaryCellsOn();
-    _eg->SetInput(_vtkuG);
-    _eg->SetImplicitFunction(_cutplane);
-
-    VTK_NEW(vtkGeometryFilter, _gf2);
-    _gf2->AddInputConnection(_eg->GetOutputPort());
-
-    _edge_mapper->SetInputConnection(_edges->GetOutputPort());
-    _visibleedgeActor->SetMapper(_edge_mapper);
-    VTK_CREATE(vtkProperty, edgesProp);
-    edgesProp = _visibleedgeActor->GetProperty();
-    edgesProp->SetColor(0.75,0.75,0.75);
-    edgesProp->SetDiffuse(0);
-    edgesProp->SetAmbient(1);
-    edgesProp->SetLineWidth(1);
-
-    _visibleactor->SetMapper(_visible_mapper);
-    VTK_CREATE(vtkProperty, elementsProp);
-    elementsProp = _visibleactor->GetProperty();
-    elementsProp->SetColor(0.1,0.27,0.75);
-    elementsProp->SetDiffuse(0);
-    elementsProp->SetAmbient(1);
-    elementsProp->SetInterpolationToFlat();
-
-
-    _ren->SetBackground( 0.1, 0.1, 0.1 );
-    this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(_ren);
-    _ren->AddViewProp(_visibleactor);
-    _ren->AddViewProp(_visibleedgeActor);
-
-    return 0;
-}
 
 void Image2Mesh::on_pushButton_ViewMesh_clicked()
 {
-//    _initializeVTK();
-
-    ShowMesh();
-
-
-
-//    ui->tabWidget->setCurrentIndex(1);
-//    VTK_CREATE(vtkGeometryFilter, geomFilter);
-//    geomFilter->AddInput(_vtkuG);
-
-//    VTK_CREATE(vtkPolyDataMapper, elementsMapper);
-//    elementsMapper->SetInput(geomFilter->GetOutput());
-
-//    VTK_CREATE(vtkActor, elementsActor);
-//    elementsActor->SetMapper(elementsMapper);
-
-//    VTK_CREATE(vtkProperty, elementsProp);
-//    elementsProp = elementsActor->GetProperty();
-//    elementsProp->SetColor(0.1,0.27,0.75);
-//    elementsProp->SetDiffuse(0);
-//    elementsProp->SetAmbient(1);
-//    elementsProp->SetInterpolationToFlat();
-
-//    VTK_CREATE(vtkExtractEdges, edgesFilter);
-//    edgesFilter->SetInput(geomFilter->GetOutput());
-
-//    VTK_CREATE(vtkPolyDataMapper, edgesMapper);
-//    edgesMapper->SetInput(edgesFilter->GetOutput());
-//    edgesMapper->ScalarVisibilityOff();
-
-//    VTK_CREATE(vtkActor,edgesActor);
-//    edgesActor->SetMapper(edgesMapper);
-
-//    VTK_CREATE(vtkProperty, edgesProp);
-//    edgesProp = edgesActor->GetProperty();
-//    edgesProp->SetColor(0.75,0.75,0.75);
-//    edgesProp->SetDiffuse(0);
-//    edgesProp->SetAmbient(1);
-//    edgesProp->SetLineWidth(1);
-
-//    VTK_CREATE(vtkRenderer, ren1);
-
-//    ren1->SetBackground( 0.1, 0.1, 0.1 );
-//    ren1->AddActor(elementsActor);
-//    ren1->AddActor(edgesActor);
-
-//    this->ui->qvtkWidget->GetRenderWindow()->AddRenderer(ren1);
-}
-
-void Image2Mesh::update_mesh()
-{
     ui->tabWidget->setCurrentIndex(1);
-    _visible_mapper->SetInputConnection(_visibleport);
-    _edges->SetInputConnection(_visibleport);
-    _visible_mapper->Update();
-    ui->qvtkWidget->GetRenderWindow()->Render();
+    ShowMesh();
 }
 
 int Image2Mesh::ShowMesh()
 {
-
-    update_mesh();
 
     if (_vtkaxescreated)
     {
@@ -507,7 +400,12 @@ int Image2Mesh::PopulateVTKPolyData()
     else
     {
         _populatedVTKPolyData = true;
-        _initializeVTK();
+        initmesh();
+        initchart();
+        ui->radioButtonVolume->toggle();
+        drawchart(0);
+        init_clip();
+        init_qfilter();
         return 0;
     }
 }
@@ -599,24 +497,44 @@ void Image2Mesh::on_checkBoxClip_stateChanged(int arg1)
     std::cerr << " checnaged ........ " << arg1 << '\n';
     if (arg1 == 0)
     {
+        if (ui->checkBoxBadQuality->isChecked())
+            _ren->RemoveActor(qcellActor);
         ui->verticalSliderClip->setEnabled(false);
         _visibleport = _gfilter->GetOutputPort();
-        ShowMesh();
+        _ren->RemoveActor(cellActor);
+        _ren->RemoveActor(celledgeActor);
+        ui->checkBoxBadQuality->setEnabled(false);
+        ui->lineEditQualThreshold->setEnabled(false);
+        UpdateView();
     }
     else if (arg1 == 2)
     {
+        _visibleport = _gf1->GetOutputPort();
+        if (ui->checkBoxBadQuality->isChecked())
+        {
+            qthreshold = ui->lineEditQualThreshold->text().toDouble();
+            update_qfilter();
+            _ren->AddViewProp(qcellActor);
+        }
+        else
+        {
+            _ren->AddViewProp(cellActor);
+            _ren->AddViewProp(celledgeActor);
+        }
         ui->verticalSliderClip->setEnabled(true);
-        do_clip();
+        ui->checkBoxBadQuality->setEnabled(true);
+        ui->lineEditQualThreshold->setEnabled(true);
+        UpdateView();
     }
-
-
 }
 
 void Image2Mesh::do_clip()
 {
-    _visibleport = _gf2->GetOutputPort();
-    update_mesh();
+    if (ui->checkBoxBadQuality->isChecked())
+        update_qfilter();
+    UpdateView();
 }
+
 
 void Image2Mesh::on_verticalSliderClip_valueChanged(int value)
 {
@@ -626,15 +544,380 @@ void Image2Mesh::on_verticalSliderClip_valueChanged(int value)
     do_clip();
 }
 
-void Image2Mesh::on_checkBoxColor_stateChanged(int arg1)
+void Image2Mesh::on_checkBoxColor_toggled(bool arg1)
 {
-    if (arg1 == 0)
+    if (arg1 == 2)
     {
-        _edge_mapper->SetScalarModeToUseCellData();
+        edge_mapper->SetScalarModeToUseCellData();
+        celledge_mapper->SetScalarModeToUseCellData();
+        visible_mapper->SetScalarModeToUseCellData();
     }
-    else if (arg1 == 2)
+    else if (arg1 == 0)
     {
-        _edge_mapper->SetScalarModeToUseCellData();
+        edge_mapper->SetScalarModeToUsePointData();
+        celledge_mapper->SetScalarModeToUsePointData();
+        visible_mapper->SetScalarModeToUsePointData();
     }
-    update_mesh();
+    UpdateView();
+}
+
+void Image2Mesh::initchart()
+{
+    plot = vtkSmartPointer<vtkChartXY>::New();
+    view = vtkSmartPointer<vtkContextView>::New();
+    view->SetInteractor(ui->qvtkChart->GetInteractor());
+    ui->qvtkChart->SetRenderWindow(view->GetRenderWindow());
+    view->GetScene()->AddItem(plot);
+
+    quality =vtkSmartPointer<vtkMeshQuality>::New();
+    quality->SetInput(_vtkuG);
+    quality->SetTetQualityMeasureToVolume();
+    quality->Update();
+
+    minq.clear(); avgq.clear(); maxq.clear(); stdq.clear();
+
+    minq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,0));
+    avgq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,1));
+    maxq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,2));
+    stdq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,3));
+    qvolarray = vtkDoubleArray::SafeDownCast(quality->GetOutput()->GetCellData()->GetArray("Quality"));
+    scalefactor[0] = compute_scalefactor(0);
+    if (scalefactor[0] != 1)
+    {
+        for (uint32_t i=0; i<qvolarray->GetNumberOfTuples(); ++i)
+        {
+            qvolarray->SetTuple1(i, qvolarray->GetTuple1(i) * scalefactor[0]);
+        }
+        minq[0] = minq[0] * scalefactor[0];
+        maxq[0] = maxq[0] * scalefactor[0];
+        avgq[0] = avgq[0] * scalefactor[0];
+        stdq[0] = stdq[0] * scalefactor[0];
+    }
+
+    quality->SetTetQualityMeasureToMinAngle();
+    quality->Update();
+
+    minq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,0));
+    avgq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,1));
+    maxq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,2));
+    stdq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,3));
+    qanglearray = vtkDoubleArray::SafeDownCast(quality->GetOutput()->GetCellData()->GetArray("Quality"));
+    scalefactor[1] = compute_scalefactor(1);
+    if (scalefactor[1] != 1)
+    {
+        for (uint32_t i=0; i<qanglearray->GetNumberOfTuples(); ++i)
+        {
+            qanglearray->SetTuple1(i, qanglearray->GetTuple1(i) * scalefactor[1]);
+        }
+        minq[1] = minq[1] * scalefactor[1];
+        maxq[1] = maxq[1] * scalefactor[1];
+        avgq[1] = avgq[1] * scalefactor[1];
+        stdq[1] = stdq[1] * scalefactor[1];
+    }
+}
+
+void Image2Mesh::drawchart(int chtype)
+{
+    vtkSmartPointer<vtkDoubleArray> currarray;
+    std::string qname;
+    if (chtype == 0)
+    {
+        currarray = qvolarray;
+        qname = std::string("Volume");
+    }
+    else
+    {
+        currarray = qanglearray;
+        qname = std::string("Min. Dihedral Angle");
+    }
+
+    vtkimage = vtkSmartPointer<vtkImageData>::New();
+    vtkimage->SetDimensions(currarray->GetNumberOfTuples(), 1, 1);
+    vtkimage->GetPointData()->SetScalars(currarray);
+    vtkimage->SetNumberOfScalarComponents(1);
+    vtkimage->SetScalarTypeToDouble();
+    vtkimage->Update();
+
+    extract = vtkSmartPointer<vtkImageExtractComponents>::New();
+    extract->SetInput(vtkimage);
+    extract->SetComponents(0);
+    extract->Update();
+
+    double *_range = extract->GetOutput()->GetScalarRange();
+    int nbins = static_cast<int>(_range[1] - _range[0]) + 1;
+    if (nbins > 50)
+        nbins = 50;
+
+    histo = vtkSmartPointer<vtkImageAccumulate>::New();
+    histo->SetInputConnection(extract->GetOutputPort());
+    histo->SetComponentExtent(0, nbins-1, 0, 0, 0, 0);
+    histo->SetComponentOrigin(_range[0], 0, 0);
+    histo->SetComponentSpacing(static_cast<int>((_range[1] - _range[0])/nbins) + 1, 0, 0);
+    histo->SetIgnoreZero(0);
+    histo->Update();
+
+//    double xmax = _range[1];
+//    double ymax = histo->GetOutput()->GetScalarRange()[1];
+
+    VTK_CREATE(vtkDoubleArray, arrX);
+    VTK_CREATE(vtkDoubleArray, arrC);
+
+    arrX->SetName(qname.c_str());
+    arrC->SetName("Y");
+
+    for (uint32_t i=0; i<histo->GetOutput()->GetNumberOfPoints(); ++i)
+    {
+        arrX->InsertNextValue(histo->GetOutput()->GetPointData()->GetArray(0)->GetTuple1(i));
+        arrC->InsertNextValue(histo->GetOutput()->GetPoint(i)[0]);
+    }
+
+    table = vtkSmartPointer<vtkTable>::New();
+    table->AddColumn(arrX);
+    table->AddColumn(arrC);
+
+    if (_1sttime_chart == false)
+        plot->ClearPlots();
+
+    vtkSmartPointer<vtkPlot> line0 = plot->AddPlot(vtkChart::BAR);
+    line0->SetInput(table, 1, 0);
+    line0->SetColor(50,100,10,255);
+    line0->SetWidth(3.0);
+    line0->GetPen()->SetLineType(vtkPen::SOLID_LINE);
+
+    plot->SetShowLegend(true);
+    plot->SetTitle("Mehs Quality Histogram");
+    plot->GetAxis(vtkAxis::LEFT)->SetTitle("Freq.");
+
+    _1sttime_chart = false;
+
+    std::string atext, aval;
+    if (chtype == 0)
+    {
+        currqidx = 0;
+        atext = "";
+        aval = "";
+    }
+    else
+    {
+        currqidx = 1;
+        atext = "Acceptable Range: 22.0 - 71.0";
+        aval = "Ideal Valeu: 70.5";
+    }
+    plot->GetAxis(vtkAxis::BOTTOM)->SetTitle(qname + " x" + QString::number(1./scalefactor[currqidx], 'e',0).toStdString());
+    ui->groupBox_6->setTitle(QString::fromAscii("Stats (x")
+                             + QString::number(1./scalefactor[currqidx], 'e',0)
+                             + QString::fromAscii(")"));
+    QString text = "Min: " + QString::number(minq[currqidx],'f',2) + "\nAvg: ";
+    text = text + QString::number(avgq[currqidx],'f',2) + "\nMax: ";
+    text = text + QString::number(maxq[currqidx],'f',2) + "\nStd Dev: ";
+    text = text + QString::number(stdq[currqidx],'f',2);
+    text = text + "\n" + atext.c_str() + "\n" + aval.c_str();
+    ui->plainTextQualityStats->setPlainText(text);
+}
+
+void Image2Mesh::init_clip()
+{
+    _eg = vtkSmartPointer<vtkExtractGeometry>::New();
+    _eg->ExtractInsideOn();;
+    _eg->ExtractBoundaryCellsOn();
+    _eg->ExtractOnlyBoundaryCellsOn();
+    _eg->SetInput(_vtkuG);
+    _eg->SetImplicitFunction(_cutplane);
+
+    _gf2 = vtkSmartPointer<vtkGeometryFilter>::New();
+    _gf2->AddInputConnection(_eg->GetOutputPort());
+
+    cellband_mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    cellband_mapper->SetInputConnection(_gf2->GetOutputPort());
+    cellband_mapper->SetScalarModeToUseCellData();
+    cellband_mapper->SetScalarRange(_vtkuG->GetScalarRange());
+
+    cellActor = vtkSmartPointer<vtkActor>::New();
+    cellActor->SetMapper(cellband_mapper);
+
+    celledges = vtkSmartPointer<vtkExtractEdges>::New();
+    celledges->SetInputConnection(_gf2->GetOutputPort());
+
+    celledge_mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    celledge_mapper->SetScalarModeToUseCellData();
+    celledge_mapper->SetInputConnection(celledges->GetOutputPort());
+    celledge_mapper->SetScalarRange(_vtkuG->GetScalarRange());
+
+    celledgeActor = vtkSmartPointer<vtkActor>::New();
+    celledgeActor->SetMapper(celledge_mapper);
+    celledgeActor->GetProperty()->SetColor(0.2,0.3,0.4);
+
+}
+
+void Image2Mesh::init_qfilter()
+{
+    bandcellq = vtkSmartPointer<vtkMeshQuality>::New();
+    bandcellq->SetInputConnection(_eg->GetOutputPort());
+    if (ui->radioButtonVolume->isChecked())
+        bandcellq->SetTetQualityMeasureToVolume();
+    else
+        bandcellq->SetTetQualityMeasureToMinAngle();
+
+    selectcells = vtkSmartPointer<vtkThreshold>::New();
+    selectcells->ThresholdByLower(qthreshold);
+    selectcells->SetInputArrayToProcess(0,0,0,
+                                        vtkDataObject::FIELD_ASSOCIATION_CELLS,
+                                        vtkDataSetAttributes::SCALARS);
+    selectcells->SetInputConnection(bandcellq->GetOutputPort());
+
+    qcellActor = vtkSmartPointer<vtkActor>::New();
+    qcell_mapper = vtkSmartPointer<vtkDataSetMapper>::New();
+
+    qcell_mapper->SetInputConnection(selectcells->GetOutputPort());
+    qcell_mapper->Update();
+
+    qcellActor->SetMapper(qcell_mapper);
+    qcellActor->GetProperty()->SetRepresentationToWireframe();
+    qcellActor->GetProperty()->SetColor(1,0,0);
+    qcellActor->GetProperty()->SetLineWidth(5);
+
+}
+
+void Image2Mesh::update_qfilter()
+{
+    if (ui->radioButtonVolume->isChecked())
+    {
+        bandcellq->SetTetQualityMeasureToVolume();
+        bandcellq->Update();
+    }
+    else
+    {
+        bandcellq->SetTetQualityMeasureToMinAngle();
+        bandcellq->Update();
+    }
+
+    selectcells->ThresholdByLower(qthreshold);
+    qcell_mapper->Update();
+
+}
+
+void Image2Mesh::initmesh()
+{
+    vtkPolyDataMapper::SetResolveCoincidentTopologyToPolygonOffset();
+    VTK_NEW(vtkGeometryFilter, this->_gfilter);
+    _gfilter->AddInput(_vtkuG);
+
+    VTK_NEW(vtkPolyDataMapper, visible_mapper);
+    visible_mapper->SetScalarModeToUseCellData();
+    visible_mapper->SetScalarModeToUsePointData();
+    visible_mapper->SetScalarRange(_vtkuG->GetScalarRange());
+
+    VTK_NEW(vtkExtractEdges, edges);
+    VTK_NEW(vtkPolyDataMapper, edge_mapper);
+    edge_mapper->SetScalarModeToUsePointData();
+    edge_mapper->SetScalarRange(_vtkuG->GetScalarRange());
+
+    VTK_NEW(vtkActor, visibleedgeActor);
+    VTK_NEW(vtkActor, visibleactor);
+    VTK_NEW(vtkRenderer, _ren);
+
+    _visibleport = _gfilter->GetOutputPort();
+    _ren->ResetCamera();
+
+    VTK_NEW(vtkPlane, _cutplane);
+    _cutplane->SetOrigin(_center);
+    _cutplane->SetNormal(0.,0.,1.);
+
+    _bbx = _vtkuG->GetBounds();
+    _center = _vtkuG->GetCenter();
+
+    VTK_NEW(vtkGeometryFilter, _gf);
+    _gf->SetInput(_vtkuG);
+
+    VTK_NEW(vtkClipPolyData, clip);
+    clip->SetInputConnection(_gf->GetOutputPort());
+    clip->SetClipFunction(_cutplane);
+    clip->InsideOutOn();
+
+    VTK_NEW(vtkGeometryFilter, _gf1);
+    _gf1->AddInputConnection(clip->GetOutputPort());
+
+    edge_mapper->SetInputConnection(edges->GetOutputPort());
+    visibleedgeActor->SetMapper(edge_mapper);
+    visibleedgeActor->GetProperty()->SetColor(0.2,0.3,0.40);
+
+    visibleactor->SetMapper(visible_mapper);
+    _ren->SetBackground(0.1,0.2,0.1);
+    ui->qvtkWidget->GetRenderWindow()->AddRenderer(_ren);
+    _ren->AddViewProp(visibleactor);
+    _ren->AddViewProp(visibleedgeActor);
+
+    UpdateView();
+
+}
+
+
+double Image2Mesh::compute_scalefactor(int i)
+{
+    double r = maxq[i] - minq[i];
+    int c = 0;
+    while (r < 10)
+    {
+        ++c;
+        r *= std::pow(10., c);
+    }
+    return std::pow(10., c+1);
+}
+
+void Image2Mesh::on_radioButtonCollapse_toggled(bool state)
+{
+    std::cout << "charte state: " << state << '\n';
+    if (state == false)
+    {
+        currqidx = 0;
+        qthreshold = avgq[currqidx] / scalefactor[currqidx];
+        ui->lineEditQualThreshold->setText(QString::number(qthreshold,'e',4));
+        update_qfilter();
+        drawchart(0); // volume quality
+    }
+    else
+    {
+        currqidx = 1;
+        qthreshold = avgq[currqidx] / scalefactor[currqidx];
+        ui->lineEditQualThreshold->setText(QString::number(qthreshold,'e',4));
+        update_qfilter();
+        drawchart(1); // min diehedral angle
+    }
+}
+
+void Image2Mesh::on_checkBoxBadQuality_toggled(bool checked)
+{
+    if (!checked)
+    {
+        _ren->RemoveActor(qcellActor);
+        ui->lineEditQualThreshold->setEnabled(0);
+        _ren->AddViewProp(cellActor);
+        _ren->AddViewProp(celledgeActor);
+    }
+    else
+    {
+        ui->lineEditQualThreshold->setEnabled(true);
+        if (ui->lineEditQualThreshold->text().isEmpty())
+            ui->lineEditQualThreshold->setText(QString::number(qthreshold,'e',4));
+        qthreshold = ui->lineEditQualThreshold->text().toDouble();
+        update_qfilter();
+        _ren->AddViewProp(qcellActor);
+        _ren->RemoveActor(cellActor);
+        _ren->RemoveActor(celledgeActor);
+    }
+    UpdateView();
+}
+
+void Image2Mesh::on_lineEditQualThreshold_returnPressed()
+{
+    qthreshold = ui->lineEditQualThreshold->text().toDouble();
+    update_qfilter();
+    UpdateView();
+}
+
+void Image2Mesh::UpdateView()
+{
+    visible_mapper->SetInputConnection(_visibleport);
+    edges->SetInputConnection(_visibleport);
+    ui->qvtkWidget->GetRenderWindow()->Render();
 }

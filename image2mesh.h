@@ -43,7 +43,15 @@ private slots:
 
     void on_verticalSliderClip_valueChanged(int value);
 
-    void on_checkBoxColor_stateChanged(int arg1);
+//    void on_checkBoxColor_stateChanged(int arg1);
+
+    void on_checkBoxBadQuality_toggled(bool checked);
+
+    void on_lineEditQualThreshold_returnPressed();
+
+    void on_radioButtonCollapse_toggled(bool checked);
+
+    void on_checkBoxColor_toggled(bool checked);
 
 signals:
 
@@ -58,6 +66,18 @@ private:
     bool _vtkaxescreated;
     bool _successimageloading;
     bool _picturestacktype;
+    double _tetscale;
+    double *_bbx;
+    double *_center;
+    bool _1sttime_chart;
+    int currqidx;
+    double qthreshold;
+    std::vector<uint32_t> scalefactor;
+    std::vector<double> minq;
+    std::vector<double> avgq;
+    std::vector<double> maxq;
+    std::vector<double> stdq;
+    //    vtkUnstructuredGrid* _vtkuG;
 
     void UpdateImageProperties();
     void UpdateMeshingCriteria();
@@ -69,27 +89,66 @@ private:
     void _loadPictureStack();
     int PopulateVTKPolyData();
     int ShowMesh();
-    int _initializeVTK();
     void do_clip();
-    void update_mesh();
-    double _tetscale;
-//    vtkUnstructuredGrid* _vtkuG;
-    double *_bbx;
-    double *_center;
+//    void update_mesh();
+    void charttypetoggled(bool);
+    void initchart();
+    double compute_scalefactor(int);
+    void drawchart(int chtype);
+    void init_clip();
+    void init_qfilter();
+    void update_qfilter();
+    void initmesh();
+    void UpdateView();
+
     vtkSmartPointer<vtkUnstructuredGrid> _vtkuG;
     vtkSmartPointer<vtkOrientationMarkerWidget> _vtkAxesWidget;
     vtkSmartPointer<vtkAxesActor> _vtkAxes;
+
     vtkSmartPointer<vtkGeometryFilter> _gfilter;
-    vtkSmartPointer<vtkPolyDataMapper> _visible_mapper;
-    vtkSmartPointer<vtkExtractEdges> _edges;
-    vtkSmartPointer<vtkPolyDataMapper> _edge_mapper;
-    vtkSmartPointer<vtkActor> _visibleedgeActor;
-    vtkSmartPointer<vtkActor> _visibleactor;
+    vtkSmartPointer<vtkGeometryFilter> _gf2;
+    vtkSmartPointer<vtkGeometryFilter> _gf;
+    vtkSmartPointer<vtkGeometryFilter> _gf1;
+
+    vtkSmartPointer<vtkPolyDataMapper> cellband_mapper;
+    vtkSmartPointer<vtkPolyDataMapper> visible_mapper;
+    vtkSmartPointer<vtkPolyDataMapper> celledge_mapper;
+    vtkSmartPointer<vtkPolyDataMapper> edge_mapper;
+    vtkSmartPointer<vtkDataSetMapper> qcell_mapper;
+
+    vtkSmartPointer<vtkExtractEdges> celledges;
+    vtkSmartPointer<vtkExtractEdges> edges;
+
+    vtkSmartPointer<vtkActor> celledgeActor;
+    vtkSmartPointer<vtkActor> cellActor;
+    vtkSmartPointer<vtkActor> qcellActor;
+    vtkSmartPointer<vtkActor> visibleedgeActor;
+    vtkSmartPointer<vtkActor> visibleactor;
+
     vtkSmartPointer<vtkRenderer> _ren;
     vtkSmartPointer<vtkAlgorithmOutput> _visibleport;
     vtkSmartPointer<vtkPlane> _cutplane;
     vtkSmartPointer<vtkExtractGeometry> _eg;
-    vtkSmartPointer<vtkGeometryFilter> _gf2;
+
+    vtkSmartPointer<vtkChartXY> plot;
+    vtkSmartPointer<vtkContextView> view;
+    vtkSmartPointer<vtkMeshQuality> quality;
+
+    vtkSmartPointer<vtkDoubleArray> qvolarray;
+    vtkSmartPointer<vtkDoubleArray> qanglearray;
+
+    vtkSmartPointer<vtkImageData> vtkimage;
+    vtkSmartPointer<vtkImageExtractComponents> extract;
+    vtkSmartPointer<vtkImageAccumulate> histo;
+
+    vtkSmartPointer<vtkTable> table;
+    vtkSmartPointer<vtkMeshQuality> bandcellq;
+    vtkSmartPointer<vtkThreshold> selectcells;
+
+    vtkSmartPointer<vtkClipPolyData> clip;
+
+
+
 };
 
 #endif // IMAGE2MESH_H

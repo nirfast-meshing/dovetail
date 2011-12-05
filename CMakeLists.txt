@@ -89,6 +89,7 @@ set(QVTK_ QVTK
   vtkCommon
   vtkInfovis
   vtkViews
+  vtkCharts
 )
 
 set (LIBS_ ${CGALLIBS_} ${QTLIBS_} ${QVTK_})
