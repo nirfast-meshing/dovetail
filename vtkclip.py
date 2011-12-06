@@ -19,7 +19,8 @@ reader = vtk.vtkUnstructuredGridReader()
 
 # reader = vtk.vtkPolyDataReader();
 # reader.SetFileName("/Users/hamid/double.vtk")
-reader.SetFileName("/Volumes/Home/foo/2.vtk")
+
+reader.SetFileName("/Users/hamid_r_ghadyani/fooka.vtk")
 reader.Update();
 # 
 # In this example we terminate the pipeline with a mapper process object.
@@ -81,6 +82,17 @@ cutActor.SetMapper(cutMapper)
 
 x = vtk.vtkActor
 
+# planeCut = vtk.vtkCutter()
+# planeCut.SetInputConnection(reader.GetOutputPort())
+# planeCut.SetCutFunction(plane)
+# 
+# cutMapper = vtk.vtkPolyDataMapper()
+# cutMapper.SetInputConnection(planeCut.GetOutputPort())
+# cutMapper.SetScalarRange(reader.GetOutput().GetScalarRange())
+# 
+# cutActor = vtk.vtkActor()
+# cutActor.SetMapper(cutMapper)
+# 
 # ren1.AddActor(cutActor)
 
 #
@@ -89,11 +101,22 @@ x = vtk.vtkActor
 # clip = vtk.vtkClipPolyData()
 clip = vtk.vtkClipDataSet()
 clip.SetInputConnection(reader.GetOutputPort())
+clip.GenerateClippedOutputOn()
 clip.SetClipFunction(plane)
 clip.InsideOutOn()
 
 clip.Update()
 print "clip cells: %d" % clip.GetOutput().GetNumberOfCells()
+
+clipped = clip.GetClippedOutput()
+cm = vtk.vtkDataSetMapper()
+cm.SetInput(clipped)
+cm.SetScalarRange(clipped.GetScalarRange())
+
+ca = vtk.vtkActor()
+ca.SetMapper(cm)
+
+ren1.AddActor(ca)
 
 # clipMapper = vtk.vtkPolyDataMapper()
 clipMapper = vtk.vtkDataSetMapper()
