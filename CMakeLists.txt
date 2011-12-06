@@ -1,4 +1,4 @@
-# -DQT_QMAKE_EXECUTABLE=/Users/hamid_r_ghadyani/local/Qt/4.7.4/bin/qmake -DVTK_DIR=/Users/hamid_r_ghadyani/local/VTK/nightly/120511/lib/vtk-5.9 -DCGAL_DIR=/Users/hamid_r_ghadyani/local/CGAL/3.8/lib/CGAL/ -DCMAKE_BUILD_TYPE=Debug
+# -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -DVTK_DIR=/Users/hamid_r_ghadyani/local/VTK/nightly/120611/lib/vtk-5.9 -DCGAL_DIR=/Users/hamid_r_ghadyani/local/CGAL/3.8/lib/CGAL/ -DCMAKE_BUILD_TYPE=Release
 # -DVTK_DIR=/Volumes/Home/foo/local/VTK/5.9.0/lib/vtk-5.9 -DQT_QMAKE_EXECUTABLE=/Volumes/Home/foo/local/Qt/4.7.4/bin/qmake -DCGAL_DIR=/Volumes/Home/foo/local/CGAL/3.9/lib/CGAL/
 project(Dovetail)
 
@@ -68,21 +68,7 @@ set ( Dovetail_MOCS
 	)
 QT4_WRAP_CPP(MOCS ${Dovetail_MOCS})
 
-IF(UNIX)
-  ADD_EXECUTABLE(Dovetail ${Dovetail_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS})
-ELSEIF(APPLE)
-  ADD_EXECUTABLE(Dovetail MACOSX_BUNDLE ${Dovetail_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS})
-ELSEIF(WIN32)
-  ADD_EXECUTABLE(Dovetail ${Dovetail_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS})
-ENDIF()
-
-# QT4
-set (QTLIBS_ ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
-#CGAL
-set (CGALLIBS_ ${Boost_LIBRARIES} ${CGAL_Core_LIBRARY} ${CGAL_ImageIO_LIBRARY}
-     ${CGAL_ImageIO_3RD_PARTY_LIBRARIES})
-# OpenGL
-# set (OPENGL_ ${OPENGL_gl_LIBRARY} ${ZLIB_LIBRARIES})
+set(OsName ${CMAKE_SYSTEM_NAME})
 
 set(QVTK_ QVTK
   vtkRendering
@@ -94,9 +80,43 @@ set(QVTK_ QVTK
   vtkCharts
 )
 
-set (LIBS_ ${CGALLIBS_} ${QTLIBS_} ${QVTK_})
+# QT4
+set (QTLIBS_ ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
+#CGAL
+set (CGALLIBS_ ${Boost_LIBRARIES} ${CGAL_Core_LIBRARY} ${CGAL_ImageIO_LIBRARY}
+	${CGAL_ImageIO_3RD_PARTY_LIBRARIES})
+set (_SOURCES ${Dovetail_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS})
+IF(${OsName} MATCHES "Linux")
+  MESSAGE("THIS IS LINUX")
+  set (OPENGL_ ${OPENGL_gl_LIBRARY} ${ZLIB_LIBRARIES})
+  set (LIBS_ ${CGALLIBS_} ${QTLIBS_} ${QVTK_} ${OPENGL})
 
-target_link_libraries ( Dovetail ${LIBS_})
+  ADD_EXECUTABLE(Dovetail ${_SOURCES})
+  target_link_libraries ( Dovetail ${LIBS_})
+
+ELSEIF(${OsName} MATCHES "Darwin")
+  MESSAGE("THIS IS APPLE")
+  set (LIBS_ ${CGALLIBS_} ${QTLIBS_} ${QVTK_})
+
+  ADD_EXECUTABLE(Dovetail MACOSX_BUNDLE ${_SOURCES})
+  target_link_libraries ( Dovetail ${LIBS_})
+
+ELSEIF(${OsName} MATCHES "Windows")
+  MESSAGE("THIS IS WINDOWS")
+  set (LIBS_ ${CGALLIBS_} ${QTLIBS_} ${QVTK_} ${OPENGL})
+
+  ADD_EXECUTABLE(Dovetail ${_SOURCES})
+  target_link_libraries ( Dovetail ${LIBS_})
+ENDIF()
+
+
+# OpenGL
+# set (OPENGL_ ${OPENGL_gl_LIBRARY} ${ZLIB_LIBRARIES})
+
+
+
+
+
 
 
 

@@ -96,9 +96,9 @@ output_c3t3_to_vtk_unstructured_grid(const C3T3& c3t3,
     vtkIdType cell[4];
     for (int i = 0; i < 4; ++i)
       cell[i] =  V[cit->vertex(i)];
-    vtk_cells->InsertNextCell(4, cell);
-    vtka->SetTuple1(inum++, static_cast<double>(CGAL::Mesh_3::get(cell_pmap, cit)));
-    std::cout << "i, id: " << inum-1 << ' ' << vtka->GetTuple1(inum-1) << '\n';
+    vtkIdType _i = vtk_cells->InsertNextCell(4, cell);
+    vtka->SetTuple1(_i, static_cast<double>(CGAL::Mesh_3::get(cell_pmap, cit)));
+//    std::cout << "i, id: " << inum-1 << ' ' << vtka->GetTuple1(inum-1) << '\n';
   }
 
   if(!grid) {
