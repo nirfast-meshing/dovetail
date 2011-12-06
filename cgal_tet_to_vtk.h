@@ -46,11 +46,11 @@ output_c3t3_to_vtk_unstructured_grid(const C3T3& c3t3,
 //  std::vector<double> materials;
 
   vtkPoints* const vtk_points = vtkPoints::New();
-//  vtkCellArray* const vtk_facets = vtkCellArray::New();
+  vtkCellArray* const vtk_facets = vtkCellArray::New();
   vtkCellArray* const vtk_cells = vtkCellArray::New();
 
   vtk_points->Allocate(c3t3.triangulation().number_of_vertices());
-//  vtk_facets->Allocate(c3t3.number_of_facets_in_complex());
+  vtk_facets->Allocate(c3t3.number_of_facets_in_complex());
   vtk_cells->Allocate(c3t3.number_of_cells_in_complex());
 
   std::map<Vertex_handle, vtkIdType> V;
@@ -69,19 +69,19 @@ output_c3t3_to_vtk_unstructured_grid(const C3T3& c3t3,
                                 CGAL::to_double(p.z()));
     V[vit] = inum++;
   }
-//  for(typename C3T3::Facets_in_complex_iterator
-//        fit = c3t3.facets_in_complex_begin(),
-//        end = c3t3.facets_in_complex_end();
-//      fit != end; ++fit)
-//  {
-//    vtkIdType cell[3];
-//    int j=0;
-//    for (int i = 0; i < 4; ++i)
-//      if (i != fit->second)
-//        cell[j++] =  V[(*fit).first->vertex(i)];
-//    CGAL_assertion(j==3);
-//    vtk_facets->InsertNextCell(3, cell);
-//  }
+  for(typename C3T3::Facets_in_complex_iterator
+        fit = c3t3.facets_in_complex_begin(),
+        end = c3t3.facets_in_complex_end();
+      fit != end; ++fit)
+  {
+    vtkIdType cell[3];
+    int j=0;
+    for (int i = 0; i < 4; ++i)
+      if (i != fit->second)
+        cell[j++] =  V[(*fit).first->vertex(i)];
+    CGAL_assertion(j==3);
+    vtk_facets->InsertNextCell(3, cell);
+  }
 
   vtkDoubleArray *vtka = vtkDoubleArray::New();
   vtka->SetNumberOfTuples(c3t3.number_of_cells_in_complex());
@@ -97,10 +97,12 @@ output_c3t3_to_vtk_unstructured_grid(const C3T3& c3t3,
     vtkIdType cell[4];
     for (int i = 0; i < 4; ++i)
       cell[i] =  V[cit->vertex(i)];
-    vtk_cells->InsertNextCell(4, cell);
-    vtka->SetTuple1(inum++, static_cast<double>(CGAL::Mesh_3::get(cell_pmap, cit)));
-    std::cout << "i, id: " << inum-1 << ' ' << vtka->GetTuple1(inum-1) << '\n';
+    vtkIdType _i = vtk_cells->InsertNextCell(4, cell);
+    vtka->SetTuple1(_i, static_cast<double>(CGAL::Mesh_3::get(cell_pmap, cit)));
+    std::cout << "i, id: " << _i << ' ' << vtka->GetTuple1(_i) << '\n';
   }
+  std::cout << "number of cells: " << c3t3.number_of_cells_in_complex() << '\n';
+  std::cout.flush();
 
 //  vtkFieldData *fd = vtkFieldData::New();
 //  fd->AllocateArrays(1);
@@ -110,16 +112,18 @@ output_c3t3_to_vtk_unstructured_grid(const C3T3& c3t3,
     grid = vtkUnstructuredGrid::New();
   }
 
+  grid->SetPoints(vtk_points);
   vtk_points->Delete();
 
-//  grid->SetCells(VTK_TRIANGLE, vtk_facets);
+
+  grid->SetCells(VTK_TRIANGLE, vtk_facets);
   grid->SetCells(VTK_TETRA, vtk_cells);
   grid->Update();
-  grid->GetCellData()->AddArray(vtka);
-//  grid->GetCellData()->SetScalars(vtka);
+//  grid->GetCellData()->AddArray(vtka);
+  grid->GetCellData()->SetScalars(vtka);
   grid->Update();
 
-//  vtk_facets->Delete();
+  vtk_facets->Delete();
   vtk_cells->Delete();
   vtka->Delete();
 //  fd->Delete();
