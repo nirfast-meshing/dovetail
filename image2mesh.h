@@ -49,7 +49,7 @@ private slots:
 
     void on_lineEditQualThreshold_returnPressed();
 
-    void on_radioButtonCollapse_toggled(bool checked);
+    void on_radioButtonVolume_toggled(bool checked);
 
     void on_checkBoxColor_toggled(bool checked);
 
@@ -71,12 +71,12 @@ private:
     double *_center;
     bool _1sttime_chart;
     int currqidx;
-    double qthreshold;
     std::vector<uint32_t> scalefactor;
     std::vector<double> minq;
     std::vector<double> avgq;
     std::vector<double> maxq;
     std::vector<double> stdq;
+    std::vector<double> qthreshold;
     //    vtkUnstructuredGrid* _vtkuG;
 
     void UpdateImageProperties();

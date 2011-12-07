@@ -27,6 +27,11 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
     ui->lineEdit_FacetSize->setText("3.0");
 
     ui->textEdit_StatusInfo->setReadOnly(true);
+    ui->plainTextQualityStats->setReadOnly(true);
+
+    ui->tab_MeshViewer->setEnabled(false);
+    ui->tab_QualityChart->setEnabled(false);
+
     _populatedVTKPolyData = false;
     _vtkaxescreated = false;
     imageDataLoaded = false;
@@ -43,9 +48,10 @@ Image2Mesh::Image2Mesh(QWidget *parent) :
 
     ui->checkBoxBadQuality->setEnabled(0);
     ui->lineEditQualThreshold->setEnabled(0);
-    ui->radioButtonVolume->toggle();
+//    ui->radioButtonVolume->setChecked(true);
     _1sttime_chart = true;
     scalefactor.resize(2,0);
+    qthreshold.resize(2,0);
 }
 
 Image2Mesh::~Image2Mesh()
@@ -402,10 +408,12 @@ int Image2Mesh::PopulateVTKPolyData()
         _populatedVTKPolyData = true;
         initmesh();
         initchart();
-        ui->radioButtonVolume->toggle();
         drawchart(0);
         init_clip();
         init_qfilter();
+        ui->radioButtonVolume->toggle();
+        ui->tab_MeshViewer->setEnabled(true);
+        ui->tab_QualityChart->setEnabled(true);
         return 0;
     }
 }
@@ -512,12 +520,13 @@ void Image2Mesh::on_checkBoxClip_stateChanged(int arg1)
         _visibleport = _gf1->GetOutputPort();
         if (ui->checkBoxBadQuality->isChecked())
         {
-            qthreshold = ui->lineEditQualThreshold->text().toDouble();
+            qthreshold[currqidx] = ui->lineEditQualThreshold->text().toDouble();
             update_qfilter();
             _ren->AddViewProp(qcellActor);
         }
         else
         {
+            celledge_mapper->Update();
             _ren->AddViewProp(cellActor);
             _ren->AddViewProp(celledgeActor);
         }
@@ -580,7 +589,10 @@ void Image2Mesh::initchart()
     avgq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,1));
     maxq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,2));
     stdq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,3));
+
     qvolarray = vtkDoubleArray::SafeDownCast(quality->GetOutput()->GetCellData()->GetArray("Quality"));
+    std::cout << "qvolarray range: " << qvolarray->GetRange()[0] << ' ' << qvolarray->GetRange()[1] << '\n';
+    std::cout.flush();
     scalefactor[0] = compute_scalefactor(0);
     if (scalefactor[0] != 1)
     {
@@ -601,7 +613,10 @@ void Image2Mesh::initchart()
     avgq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,1));
     maxq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,2));
     stdq.push_back(quality->GetOutput()->GetFieldData()->GetArray("Mesh Tetrahedron Quality")->GetComponent(0,3));
+
     qanglearray = vtkDoubleArray::SafeDownCast(quality->GetOutput()->GetCellData()->GetArray("Quality"));
+    std::cout << "qanglearray range: " << qanglearray->GetRange()[0] << ' ' << qanglearray->GetRange()[1] << '\n';
+    std::cout.flush();
     scalefactor[1] = compute_scalefactor(1);
     if (scalefactor[1] != 1)
     {
@@ -614,6 +629,7 @@ void Image2Mesh::initchart()
         avgq[1] = avgq[1] * scalefactor[1];
         stdq[1] = stdq[1] * scalefactor[1];
     }
+    currqidx = 0;
 }
 
 void Image2Mesh::drawchart(int chtype)
@@ -631,6 +647,11 @@ void Image2Mesh::drawchart(int chtype)
         qname = std::string("Min. Dihedral Angle");
     }
 
+//    view->GetScene()->RemoveItem(plot);
+    view->SetInteractor(ui->qvtkChart->GetInteractor());
+    ui->qvtkChart->SetRenderWindow(view->GetRenderWindow());
+
+
     vtkimage = vtkSmartPointer<vtkImageData>::New();
     vtkimage->SetDimensions(currarray->GetNumberOfTuples(), 1, 1);
     vtkimage->GetPointData()->SetScalars(currarray);
@@ -647,12 +668,14 @@ void Image2Mesh::drawchart(int chtype)
     int nbins = static_cast<int>(_range[1] - _range[0]) + 1;
     if (nbins > 50)
         nbins = 50;
+    std::cout << "extract range is : ";
+    std::cout << _range[0] << ' ' << _range[1] << ' ' << nbins << '\n';
 
     histo = vtkSmartPointer<vtkImageAccumulate>::New();
     histo->SetInputConnection(extract->GetOutputPort());
     histo->SetComponentExtent(0, nbins-1, 0, 0, 0, 0);
     histo->SetComponentOrigin(_range[0], 0, 0);
-    histo->SetComponentSpacing(static_cast<int>((_range[1] - _range[0])/nbins) + 1, 0, 0);
+    histo->SetComponentSpacing((_range[1] - _range[0])/nbins, 0, 0);
     histo->SetIgnoreZero(0);
     histo->Update();
 
@@ -671,6 +694,9 @@ void Image2Mesh::drawchart(int chtype)
         arrC->InsertNextValue(histo->GetOutput()->GetPoint(i)[0]);
     }
 
+    std::cout << arrX->GetRange()[0] << ' ' << arrX->GetRange()[1] << '\n';
+    std::cout << arrC->GetRange()[0] << ' ' << arrC->GetRange()[1] << '\n';
+    std::cout.flush();
     table = vtkSmartPointer<vtkTable>::New();
     table->AddColumn(arrX);
     table->AddColumn(arrC);
@@ -687,6 +713,8 @@ void Image2Mesh::drawchart(int chtype)
     plot->SetShowLegend(true);
     plot->SetTitle("Mehs Quality Histogram");
     plot->GetAxis(vtkAxis::LEFT)->SetTitle("Freq.");
+    plot->GetAxis(vtkAxis::BOTTOM)->SetRange(arrX->GetRange()[0], arrX->GetRange()[1]);
+    plot->Update();
 
     _1sttime_chart = false;
 
@@ -723,6 +751,7 @@ void Image2Mesh::init_clip()
     _eg->ExtractOnlyBoundaryCellsOn();
     _eg->SetInput(_vtkuG);
     _eg->SetImplicitFunction(_cutplane);
+    _eg->Update();
 
     _gf2 = vtkSmartPointer<vtkGeometryFilter>::New();
     _gf2->AddInputConnection(_eg->GetOutputPort());
@@ -759,7 +788,7 @@ void Image2Mesh::init_qfilter()
         bandcellq->SetTetQualityMeasureToMinAngle();
 
     selectcells = vtkSmartPointer<vtkThreshold>::New();
-    selectcells->ThresholdByLower(qthreshold);
+    selectcells->ThresholdByLower(qthreshold[currqidx]);
     selectcells->SetInputArrayToProcess(0,0,0,
                                         vtkDataObject::FIELD_ASSOCIATION_CELLS,
                                         vtkDataSetAttributes::SCALARS);
@@ -791,7 +820,7 @@ void Image2Mesh::update_qfilter()
         bandcellq->Update();
     }
 
-    selectcells->ThresholdByLower(qthreshold);
+    selectcells->ThresholdByLower(qthreshold[currqidx]);
     qcell_mapper->Update();
 
 }
@@ -861,25 +890,28 @@ double Image2Mesh::compute_scalefactor(int i)
         ++c;
         r *= std::pow(10., c);
     }
-    return std::pow(10., c+1);
+    return std::pow(10., c);
 }
 
-void Image2Mesh::on_radioButtonCollapse_toggled(bool state)
+void Image2Mesh::on_radioButtonVolume_toggled(bool state)
 {
     std::cout << "charte state: " << state << '\n';
-    if (state == false)
+    if (state == true)
     {
         currqidx = 0;
-        qthreshold = avgq[currqidx] / scalefactor[currqidx];
-        ui->lineEditQualThreshold->setText(QString::number(qthreshold,'e',4));
+
+        if (ui->lineEditQualThreshold->text().isEmpty())
+            qthreshold[currqidx] = avgq[currqidx] / scalefactor[currqidx];
+        ui->lineEditQualThreshold->setText(QString::number(qthreshold[currqidx],'e',4));
         update_qfilter();
         drawchart(0); // volume quality
     }
     else
     {
         currqidx = 1;
-        qthreshold = avgq[currqidx] / scalefactor[currqidx];
-        ui->lineEditQualThreshold->setText(QString::number(qthreshold,'e',4));
+        if (ui->lineEditQualThreshold->text().isEmpty())
+            qthreshold[currqidx] = avgq[currqidx] / scalefactor[currqidx];
+        ui->lineEditQualThreshold->setText(QString::number(qthreshold[currqidx],'e',4));
         update_qfilter();
         drawchart(1); // min diehedral angle
     }
@@ -898,8 +930,8 @@ void Image2Mesh::on_checkBoxBadQuality_toggled(bool checked)
     {
         ui->lineEditQualThreshold->setEnabled(true);
         if (ui->lineEditQualThreshold->text().isEmpty())
-            ui->lineEditQualThreshold->setText(QString::number(qthreshold,'e',4));
-        qthreshold = ui->lineEditQualThreshold->text().toDouble();
+            ui->lineEditQualThreshold->setText(QString::number(qthreshold[currqidx],'e',4));
+        qthreshold[currqidx] = ui->lineEditQualThreshold->text().toDouble();
         update_qfilter();
         _ren->AddViewProp(qcellActor);
         _ren->RemoveActor(cellActor);
@@ -910,7 +942,7 @@ void Image2Mesh::on_checkBoxBadQuality_toggled(bool checked)
 
 void Image2Mesh::on_lineEditQualThreshold_returnPressed()
 {
-    qthreshold = ui->lineEditQualThreshold->text().toDouble();
+    qthreshold[currqidx] = ui->lineEditQualThreshold->text().toDouble();
     update_qfilter();
     UpdateView();
 }
