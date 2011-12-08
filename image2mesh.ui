@@ -542,7 +542,11 @@
                       <number>2</number>
                      </property>
                      <item>
-                      <widget class="QLineEdit" name="lineEdit_TetSize"/>
+                      <widget class="QLineEdit" name="lineEdit_TetSize">
+                       <property name="alignment">
+                        <set>Qt::AlignCenter</set>
+                       </property>
+                      </widget>
                      </item>
                      <item>
                       <widget class="QLabel" name="label_19">
@@ -565,7 +569,11 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="lineEdit_TetQual"/>
+                    <widget class="QLineEdit" name="lineEdit_TetQual">
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
+                     </property>
+                    </widget>
                    </item>
                   </layout>
                  </widget>
@@ -613,7 +621,11 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="lineEdit_FacetSize"/>
+                    <widget class="QLineEdit" name="lineEdit_FacetSize">
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
+                     </property>
+                    </widget>
                    </item>
                    <item>
                     <widget class="QLabel" name="label_23">
@@ -640,7 +652,11 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="lineEdit_FacetAngle"/>
+                    <widget class="QLineEdit" name="lineEdit_FacetAngle">
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
+                     </property>
+                    </widget>
                    </item>
                    <item>
                     <widget class="QLabel" name="label_24">
@@ -667,7 +683,11 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="lineEdit_FacetDistance"/>
+                    <widget class="QLineEdit" name="lineEdit_FacetDistance">
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
+                     </property>
+                    </widget>
                    </item>
                    <item>
                     <widget class="QLabel" name="label_25">
@@ -709,7 +729,11 @@
                        <string>Region ID</string>
                       </property>
                      </widget>
-                     <widget class="QLineEdit" name="lineEdit_SpecialID1"/>
+                     <widget class="QLineEdit" name="lineEdit_SpecialID1">
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
                      <widget class="QWidget" name="layoutWidget13">
                       <layout class="QVBoxLayout" name="verticalLayout_6">
                        <item>
@@ -1021,39 +1045,66 @@ Quality Tets</string>
       <attribute name="title">
        <string>Quality Histogram</string>
       </attribute>
-      <layout class="QHBoxLayout" name="horizontalLayout_13">
+      <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
         <widget class="QSplitter" name="splitter_14">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <widget class="QWidget" name="layoutWidget17">
+         <widget class="QWidget" name="">
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_11">
              <item>
-              <widget class="QRadioButton" name="radioButtonVolume">
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
+              <widget class="QGroupBox" name="groupBox_9">
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>50</height>
+                </size>
                </property>
-               <property name="text">
-                <string>Volume</string>
+               <property name="title">
+                <string>Choose a quality measure:</string>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="radioButtonMinAngle">
-               <property name="font">
-                <font>
-                 <pointsize>12</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>Min. Diehedral
-Angle</string>
-               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_3">
+                <property name="spacing">
+                 <number>-1</number>
+                </property>
+                <property name="margin">
+                 <number>1</number>
+                </property>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_14">
+                  <property name="spacing">
+                   <number>16</number>
+                  </property>
+                  <item>
+                   <widget class="QRadioButton" name="radioButtonVolume">
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Volume</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QRadioButton" name="radioButtonMinAngle">
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Min. Diehedral Angle</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
               </widget>
              </item>
              <item>
@@ -1061,9 +1112,12 @@ Angle</string>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Minimum</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>40</width>
+                 <width>375</width>
                  <height>20</height>
                 </size>
                </property>

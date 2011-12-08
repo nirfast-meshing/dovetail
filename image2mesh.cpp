@@ -199,10 +199,11 @@ void Image2Mesh::on_pushButton_GenerateMesh_clicked()
     else
     {
         ui->textEdit_StatusInfo->clear();
-        QString foo = "\nMesh generation completed.";
+        QString foo = "\n\nMesh generation completed.";
         foo += "\n  No of nodes: " + QString::number(mesher.NoOfVertices());
         foo += "\n  No of elements: " + QString::number(mesher.NoOfCells());
         ui->textEdit_StatusInfo->setText(foo);
+
         int st = PopulateVTKPolyData();
         if (st != 0)
         {
@@ -396,6 +397,7 @@ int Image2Mesh::PopulateVTKPolyData()
 //    if (_populatedVTKPolyData)
 //        _vtkuG->Delete();
 //    _vtkuG = 0;
+
     _vtkuG = vtkSmartPointer<vtkUnstructuredGrid>::New();
     CGAL::output_c3t3_to_vtk_unstructured_grid<C3t3>(this->mesher.c3t3, _vtkuG);
     if (!_vtkuG)
@@ -411,9 +413,15 @@ int Image2Mesh::PopulateVTKPolyData()
         drawchart(0);
         init_clip();
         init_qfilter();
-        ui->radioButtonVolume->toggle();
+        ui->radioButtonVolume->setChecked(true);
         ui->tab_MeshViewer->setEnabled(true);
         ui->tab_QualityChart->setEnabled(true);
+        ui->checkBoxClip->setEnabled(true);
+        ui->checkBoxClip->setChecked(false);
+        ui->checkBoxBadQuality->setEnabled(false);
+        ui->checkBoxBadQuality->setChecked(false);
+        ui->lineEditQualThreshold->text().clear();
+        ui->lineEditQualThreshold->setEnabled(false);
         return 0;
     }
 }
@@ -600,10 +608,10 @@ void Image2Mesh::initchart()
         {
             qvolarray->SetTuple1(i, qvolarray->GetTuple1(i) * scalefactor[0]);
         }
-        minq[0] = minq[0] * scalefactor[0];
-        maxq[0] = maxq[0] * scalefactor[0];
-        avgq[0] = avgq[0] * scalefactor[0];
-        stdq[0] = stdq[0] * scalefactor[0];
+//        minq[0] = minq[0] * scalefactor[0];
+//        maxq[0] = maxq[0] * scalefactor[0];
+//        avgq[0] = avgq[0] * scalefactor[0];
+//        stdq[0] = stdq[0] * scalefactor[0];
     }
 
     quality->SetTetQualityMeasureToMinAngle();
@@ -624,10 +632,10 @@ void Image2Mesh::initchart()
         {
             qanglearray->SetTuple1(i, qanglearray->GetTuple1(i) * scalefactor[1]);
         }
-        minq[1] = minq[1] * scalefactor[1];
-        maxq[1] = maxq[1] * scalefactor[1];
-        avgq[1] = avgq[1] * scalefactor[1];
-        stdq[1] = stdq[1] * scalefactor[1];
+//        minq[1] = minq[1] * scalefactor[1];
+//        maxq[1] = maxq[1] * scalefactor[1];
+//        avgq[1] = avgq[1] * scalefactor[1];
+//        stdq[1] = stdq[1] * scalefactor[1];
     }
     currqidx = 0;
 }
@@ -691,7 +699,7 @@ void Image2Mesh::drawchart(int chtype)
     for (uint32_t i=0; i<histo->GetOutput()->GetNumberOfPoints(); ++i)
     {
         arrX->InsertNextValue(histo->GetOutput()->GetPointData()->GetArray(0)->GetTuple1(i));
-        arrC->InsertNextValue(histo->GetOutput()->GetPoint(i)[0]);
+        arrC->InsertNextValue(histo->GetOutput()->GetPoint(i)[0]/scalefactor[currqidx]);
     }
 
     std::cout << arrX->GetRange()[0] << ' ' << arrX->GetRange()[1] << '\n';
@@ -728,18 +736,31 @@ void Image2Mesh::drawchart(int chtype)
     else
     {
         currqidx = 1;
-        atext = "Acceptable Range: 22.0 - 71.0";
-        aval = "Ideal Valeu: 70.5";
+        atext = "Acceptable Range:\n22.0 - 71.0";
+        aval = "Ideal Value: 70.5";
     }
-    plot->GetAxis(vtkAxis::BOTTOM)->SetTitle(qname + " x" + QString::number(1./scalefactor[currqidx], 'e',0).toStdString());
-    ui->groupBox_6->setTitle(QString::fromAscii("Stats (x")
-                             + QString::number(1./scalefactor[currqidx], 'e',0)
-                             + QString::fromAscii(")"));
-    QString text = "Min: " + QString::number(minq[currqidx],'f',2) + "\nAvg: ";
-    text = text + QString::number(avgq[currqidx],'f',2) + "\nMax: ";
-    text = text + QString::number(maxq[currqidx],'f',2) + "\nStd Dev: ";
-    text = text + QString::number(stdq[currqidx],'f',2);
-    text = text + "\n" + atext.c_str() + "\n" + aval.c_str();
+    plot->GetAxis(vtkAxis::BOTTOM)->SetTitle(qname);
+//    ui->groupBox_6->setTitle(QString::fromAscii("Stats (x")
+//                             + QString::number(1./scalefactor[currqidx], 'e',0)
+//                             + QString::fromAscii(")"));
+
+    std::string fstring, fs;
+    if (std::max(arrC->GetRange()[0],arrC->GetRange()[1]) < 1e-3)
+    {
+        fstring = "Min: %.2e\nAvg: %.2e\nMax: %.2e\n\n";
+        fs = "%.2d";
+    }
+    else
+    {
+        fstring = "Min: %f\nAvg: %f\nMax: %f\n\n";
+        fs = "%f";
+    }
+    char _s[1024];
+    sprintf(_s,fstring.c_str(), minq[currqidx], avgq[currqidx], maxq[currqidx]);
+    QString text = QString::fromAscii(_s);
+    sprintf(_s,fs.c_str(),stdq[currqidx]);
+    text += "Std Dev: " + QString::fromAscii(_s);
+    text = text + "\n\n" + atext.c_str() + "\n" + aval.c_str();
     ui->plainTextQualityStats->setPlainText(text);
 }
 
@@ -884,11 +905,12 @@ void Image2Mesh::initmesh()
 double Image2Mesh::compute_scalefactor(int i)
 {
     double r = maxq[i] - minq[i];
+    double r0 = r;
     int c = 0;
     while (r < 10)
     {
         ++c;
-        r *= std::pow(10., c);
+        r = r0 * std::pow(10., c);
     }
     return std::pow(10., c);
 }
@@ -901,7 +923,7 @@ void Image2Mesh::on_radioButtonVolume_toggled(bool state)
         currqidx = 0;
 
         if (ui->lineEditQualThreshold->text().isEmpty())
-            qthreshold[currqidx] = avgq[currqidx] / scalefactor[currqidx];
+            qthreshold[currqidx] = avgq[currqidx];// / scalefactor[currqidx];
         ui->lineEditQualThreshold->setText(QString::number(qthreshold[currqidx],'e',4));
         update_qfilter();
         drawchart(0); // volume quality
@@ -910,7 +932,7 @@ void Image2Mesh::on_radioButtonVolume_toggled(bool state)
     {
         currqidx = 1;
         if (ui->lineEditQualThreshold->text().isEmpty())
-            qthreshold[currqidx] = avgq[currqidx] / scalefactor[currqidx];
+            qthreshold[currqidx] = avgq[currqidx];// / scalefactor[currqidx];
         ui->lineEditQualThreshold->setText(QString::number(qthreshold[currqidx],'e',4));
         update_qfilter();
         drawchart(1); // min diehedral angle
