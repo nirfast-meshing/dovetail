@@ -3,7 +3,14 @@
 project(Dovetail)
 
 cmake_minimum_required( VERSION 2.6 )
-cmake_policy(SET CMP0017 NEW)
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+ MESSAGE("WUT")
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    cmake_policy(SET CMP0017 NEW)
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 #set ( CMAKE_BUILD_TYPE Debug )
 
 add_definitions ( -Wall -Wno-deprecated -fno-strict-aliasing ) # -Wl,-no-pie) # -mdynamic-no-pic
@@ -20,7 +27,7 @@ INCLUDE(${VTK_USE_FILE})
 ENDIF(NOT VTK_BINARY_DIR)
 
 
-LIST(APPEND CMAKE_MODULE_PATH "/usr/local/lib/CGAL")
+# LIST(APPEND CMAKE_MODULE_PATH "/usr/local/lib/CGAL")
 find_package ( Qt4 REQUIRED COMPONENTS QTCORE QTGUI)
 include ( ${QT_USE_FILE} )
 find_package (CGAL REQUIRED)
