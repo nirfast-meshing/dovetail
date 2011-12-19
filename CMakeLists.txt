@@ -1,5 +1,6 @@
 # -DQT_QMAKE_EXECUTABLE=/usr/local/bin/qmake -DVTK_DIR=/Users/hamid_r_ghadyani/local/VTK/nightly/120611/lib/vtk-5.9 -DCGAL_DIR=/Users/hamid_r_ghadyani/local/CGAL/3.8/lib/CGAL/ -DCMAKE_BUILD_TYPE=Release
 # -DVTK_DIR=/Volumes/Home/foo/local/VTK/5.9.0/lib/vtk-5.9 -DQT_QMAKE_EXECUTABLE=/Volumes/Home/foo/local/Qt/4.7.4/bin/qmake -DCGAL_DIR=/Volumes/Home/foo/local/CGAL/3.9/lib/CGAL/
+# -DVTK_DIR=/home/hamid/local/VTK/static/lib/vtk-5.9 -DQT_QMAKE_EXECUTABLE=/home/hamid/local/Qt/4.7.4/bin/qmake -DCGAL_DIR=/home/hamid/local/CGAL/3.8/lib/CGAL/ -DCMAKE_BUILD_TYPE=Release
 project(Dovetail)
 
 cmake_minimum_required( VERSION 2.6 )
